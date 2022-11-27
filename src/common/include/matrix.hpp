@@ -7,6 +7,6 @@ struct Matrix {
   float *data;
 };
 
-Matrix *multiply(int32_t M, int32_t P, int32_t N, float *matrix1, float *matrix2, float *matrixOut);
+Matrix *multiply(int32_t M, int32_t P, int32_t N, float *A, float *B, float *C);
 
 } // namespace matrix
