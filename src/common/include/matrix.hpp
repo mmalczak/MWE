@@ -3,7 +3,7 @@
 namespace matrix {
 
 struct Matrix {
-  int32_t n_rows, n_columns;
+  int32_t M, N;
   float *data;
 };
 
