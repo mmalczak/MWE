@@ -1,18 +1,27 @@
 #include "common/include/matrix.hpp"
+#include "common/include/utils.hpp"
+
+#include <cstdlib>
 
 #include <gtest/gtest.h>
 
-constexpr int32_t max_rows = 32;
-constexpr int32_t max_cols = 32;
-constexpr float tolerance = 1e-6;
+constexpr float tolerance = 1e-4;
 
 class BasicTest : public ::testing::Test {
 public:
-  matrix::Matrix create_matrix(int32_t M, int32_t N, float *data) { return matrix::Matrix{.M = M, .N = N, .data = data}; }
+  matrix::Matrix construct_matrix(int32_t M, int32_t N) {
+    matrix::Matrix a;
+
+    a.data = static_cast<float *>(calloc(M * N, sizeof(float)));
+    a.M = M;
+    a.N = N;
+
+    return a;
+  }
 
   void verify(const matrix::Matrix &m1, const matrix::Matrix &m2) {
-    EXPECT_EQ(m1.M, m2.N);
-    EXPECT_EQ(m1.N, m2.N);
+    ASSERT_EQ(m1.M, m2.M);
+    ASSERT_EQ(m1.N, m2.N);
 
     int32_t M = m1.M;
     int32_t N = m1.N;
@@ -23,23 +32,50 @@ public:
       }
     }
   }
+
+  void load_data(std::string tc_name) {
+    std::string a_path = tc_name + "/" + "A";
+    std::string b_path = tc_name + "/" + "B";
+    std::string c_path = tc_name + "/" + "C";
+    std::string dim_path = tc_name + "/" + "Dims";
+
+    std::vector<int32_t> dims;
+    utils::read_blob_file(dim_path, dims);
+
+    int32_t M = dims[0];
+    int32_t P = dims[1];
+    int32_t N = dims[2];
+
+    a = construct_matrix(M, P);
+    b = construct_matrix(P, N);
+    c = construct_matrix(M, N);
+
+    utils::load<float>(a_path, a.data);
+    utils::load<float>(b_path, b.data);
+    utils::load<float>(c_path, c.data);
+  }
+
+  void free_data() {
+    free(a.data);
+    free(b.data);
+    free(c.data);
+  }
+
+  matrix::Matrix a;
+  matrix::Matrix b;
+  matrix::Matrix c;
 };
 
-TEST_F(BasicTest, test_2x2) {
-  constexpr int32_t M = 2;
-  constexpr int32_t N = 2;
+TEST_F(BasicTest, testWithBinaryFiles) {
+  std::string tc_name = "tc1";
 
-  float m1_data[max_rows * max_cols]{};
-  float m2_data[max_rows * max_cols]{};
-  float out_data[max_rows * max_cols]{};
-  float exp_data[max_rows * max_cols]{};
+  load_data(tc_name);
 
-  matrix::Matrix m1 = create_matrix(M, N, &m1_data[0]);
-  matrix::Matrix m2 = create_matrix(M, N, &m2_data[0]);
-  matrix::Matrix out = create_matrix(M, N, &out_data[0]);
-  matrix::Matrix exp = create_matrix(M, N, &exp_data[0]);
+  matrix::Matrix res = construct_matrix(c.M, c.N);
+  matrix::multiply(a.M, a.N, b.N, a.data, b.data, res.data);
 
-  matrix::multiply(m1.M, m1.N, m2.N, m1.data, m2.data, out.data);
+  verify(c, res);
 
-  verify(out, exp);
+  free_data();
+  free(res.data);
 }

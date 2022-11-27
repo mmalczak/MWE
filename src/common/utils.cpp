@@ -49,8 +49,22 @@ template <typename T> void read_blob_file(const std::string &filename, std::vect
   file.close();
 }
 
+template <typename T> void load(std::string filename, T *dst) {
+  {
+    std::vector<T> d;
+    read_blob_file(filename, d);
+    std::copy(d.begin(), d.end(), dst);
+  }
+}
+
 template void read_blob_file(const std::string &path, std::vector<float> &out);
 template void read_blob_file(const std::string &path, std::vector<int8_t> &out);
 template void read_blob_file(const std::string &path, std::vector<int16_t> &out);
 template void read_blob_file(const std::string &path, std::vector<int32_t> &out);
+
+template void load(std::string filename, float *dst);
+template void load(std::string filename, int8_t *dst);
+template void load(std::string filename, int16_t *dst);
+template void load(std::string filename, int32_t *dst);
+
 } // namespace utils
