@@ -17,13 +17,13 @@ endif()
 set(CMAKE_CXX_EXTENSIONS OFF)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-include_directories("${PROJECT_SOURCE_DIR}/include/")
+include_directories("${PROJECT_SOURCE_DIR}/src/")
 
 find_package(GTest)
 include_directories(${GTEST_INCLUDE_DIRS})
 enable_testing()
 
-add_subdirectory(apps)
+add_subdirectory(examples)
 add_subdirectory(src)
 add_subdirectory(tests)
 
