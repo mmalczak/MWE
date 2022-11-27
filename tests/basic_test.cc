@@ -66,6 +66,20 @@ public:
   matrix::Matrix c;
 };
 
+TEST_F(BasicTest, testBasicSquare) {
+  float A[4] = {1, 2, 3, 4};
+  float B[4] = {1, 2, 3, 4};
+  float C[4] = {7, 10, 15, 22};
+  int32_t M = 2;
+  int32_t P = 2;
+  int32_t N = 2;
+  float res[4] = {0, 0, 0, 0};
+  matrix::multiply(M, P, N, A, B, res);
+  for (int i = 0; i < M * N; i++) {
+    ASSERT_EQ(C[i], res[i]);
+  }
+}
+
 TEST_F(BasicTest, testWithBinaryFiles) {
   std::string tc_name = "tc1";
 
