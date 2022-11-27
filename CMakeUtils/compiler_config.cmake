@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(SPECIAL_GTEST_FLAG " -Wno-deprecated-declarations")
 
 set(COMMON_CXX_FLAGS
-    "${CXX_FLAGS} ${CMAKE_CXX_FLAGS} ${SPECIAL_GTEST_FLAG} -Wdouble-promotion -Wformat=2 -Wstrict-aliasing -Werror -Wpedantic -march=native -mtune=native -ffast-math -fno-builtin -fno-rtti -fno-exceptions"
+    "${CXX_FLAGS} ${CMAKE_CXX_FLAGS} ${SPECIAL_GTEST_FLAG} -Wformat=2 -Wstrict-aliasing -Werror -Wpedantic -march=native -mtune=native -ffast-math -fno-builtin -fno-rtti -fno-exceptions"
 )
 set(ASAN_CXX_FLAGS
     " -fsanitize=address,undefined -fsanitize-undefined-trap-on-error")
