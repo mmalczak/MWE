@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.16)
 set(PACKAGE_NAME "MWE_matmul")
 set(PACKAGE_VERSION "0.1")
 
+include("CMakeUtils/compiler_config.cmake")
+
 project(
   ${PACKAGE_NAME}
   VERSION ${PACKAGE_VERSION}
