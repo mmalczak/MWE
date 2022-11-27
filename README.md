@@ -14,7 +14,8 @@
 > ninja -C ./build all
 
 ## Run app
-> ./build/apps/mwe
+> ./build/examples/mwe
 
 ## Run Unit Tests
+> export BLOBS_DIR="${PWD}/tests/blobs/"
 > cd build && ctest --verbose
