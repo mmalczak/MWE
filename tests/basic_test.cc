@@ -48,7 +48,7 @@ public:
     ASSERT_EQ(m1.M, m2.M);
     ASSERT_EQ(m1.N, m2.N);
 
-    for (int64_t i = 0; i < m1.M * m1.N; i++) {
+    for (int32_t i = 0; i < m1.M * m1.N; i++) {
       EXPECT_NEAR(m1.data[i], m2.data[i], tolerance);
     }
   }
