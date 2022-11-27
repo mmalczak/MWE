@@ -4,29 +4,42 @@
 
 constexpr int32_t max_rows = 32;
 constexpr int32_t max_cols = 32;
+constexpr float tolerance = 1e-6;
 
 class BasicTest : public ::testing::Test {
 public:
-  float m1_data[max_rows * max_cols]{};
-  float m2_data[max_rows * max_cols]{};
-  float exp_out[max_rows * max_cols]{};
+  matrix::Matrix create_matrix(int32_t M, int32_t N, float *data) { return matrix::Matrix{.M = M, .N = N, .data = data}; }
+
+  void verify(const matrix::Matrix &m1, const matrix::Matrix &m2) {
+    EXPECT_EQ(m1.M, m2.N);
+    EXPECT_EQ(m1.N, m2.N);
+
+    int32_t M = m1.M;
+    int32_t N = m1.N;
+
+    for (int32_t i = 0; i < M; i++) {
+      for (int32_t j = 0; j < N; j++) {
+        EXPECT_NEAR(m1.data[i * M + j], m2.data[i * M + j], tolerance);
+      }
+    }
+  }
 };
 
 TEST_F(BasicTest, test_2x2) {
-  constexpr int32_t rows = 2;
-  constexpr int32_t columns = 2;
+  constexpr int32_t M = 2;
+  constexpr int32_t N = 2;
 
-  matrix::Matrix m1{.n_rows = rows, .n_columns = columns, .data = &m1_data[0]};
-  matrix::Matrix m2{.n_rows = rows, .n_columns = columns, .data = &m2_data[0]};
-
+  float m1_data[max_rows * max_cols]{};
+  float m2_data[max_rows * max_cols]{};
   float out_data[max_rows * max_cols]{};
-  matrix::Matrix out{.n_rows = rows, .n_columns = columns, .data = &out_data[0]};
+  float exp_data[max_rows * max_cols]{};
 
-  matrix::multiply(m1.n_rows, m1.n_columns, m2.n_columns, m1.data, m2.data, out.data);
+  matrix::Matrix m1 = create_matrix(M, N, &m1_data[0]);
+  matrix::Matrix m2 = create_matrix(M, N, &m2_data[0]);
+  matrix::Matrix out = create_matrix(M, N, &out_data[0]);
+  matrix::Matrix exp = create_matrix(M, N, &exp_data[0]);
 
-  for (int32_t i = 0; i < rows; i++) {
-    for (int32_t k = 0; k < columns; k++) {
-      EXPECT_NEAR(out.data[i * rows + k], exp_out[i * rows + k], 1e-4f);
-    }
-  }
+  matrix::multiply(m1.M, m1.N, m2.N, m1.data, m2.data, out.data);
+
+  verify(out, exp);
 }
