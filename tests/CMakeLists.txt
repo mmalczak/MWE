@@ -1,24 +1,15 @@
-include(FetchContent)
-FetchContent_Declare(
-    googletest
-    URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
-)
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
+set(srcs ${CMAKE_CURRENT_SOURCE_DIR}/basic_test.cc)
 
+add_executable(matmul_test ${srcs})
 
+target_link_libraries(matmul_test ${GTEST_LIBRARIES} pthread)
 
-enable_testing()
+if(NOT ("${GTEST_DEPENDENCY}" STREQUAL ""))
+  add_dependencies(matmul_test ${GTEST_DEPENDENCY})
+endif()
 
-add_executable(
-    matrix_test
-    matrix_test.cc
-)
+gtest_discover_tests(matmul_test ${srcs} TEST_PREFIX matmul_test)
 
-target_link_libraries(
-    matrix_test
-    GTest::gtest_main
-)
-
-include(GoogleTest)
-gtest_discover_tests(matrix_test)
+set(unit_tests
+    ${unit_tests} matmul_test
+    PARENT_SCOPE)
