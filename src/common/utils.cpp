@@ -1,6 +1,7 @@
 #include "common/include/matrix.hpp"
 #include "common/include/utils.hpp"
 
+#include <cstdint>
 #include <fstream>
 #include <cstdio>
 #include <string>
@@ -8,9 +9,9 @@
 
 namespace utils {
 
-void print(int M, int N, float *data) {
-  for (int j = 0; j < M; j++) {
-    for (int i = 0; i < N; i++) {
+void print(int32_t M, int32_t N, float *data) {
+  for (int32_t j = 0; j < M; j++) {
+    for (int32_t i = 0; i < N; i++) {
       printf("%f ", *data++);
     }
     printf("\n");
@@ -38,7 +39,7 @@ template <typename T> void read_blob_file(const std::string &filename, std::vect
   file.seekg(0, std::ios::beg);
 
   uint32_t items = size / (sizeof(T) / sizeof(char));
-  for (int i = 0; i < items; i++) {
+  for (uint32_t i = 0; i < items; i++) {
     T memblock{};
 
     file.read(reinterpret_cast<char *>(&memblock), sizeof(T));
