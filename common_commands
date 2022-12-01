@@ -1,0 +1,4 @@
+cmake -B ${PWD}/build/ -D CMAKE_BUILD_TYPE="Release"
+cmake -B ${PWD}/build/ -D CMAKE_BUILD_TYPE="Debug"
+ninja -C build
+ctest --test-dir /src/mwe/build/

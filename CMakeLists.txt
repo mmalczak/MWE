@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.20)
 
 set(PACKAGE_NAME "MWE_matmul")
 set(PACKAGE_VERSION "0.1")
