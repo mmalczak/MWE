@@ -3,19 +3,34 @@
 ## Code formatting
 > ./scripts/code_format.sh
 
-## Build
-
-### Debug
+## Local environment
+### Debug build
 > cmake -B ${PWD}/build/ -D CMAKE_BUILD_TYPE="Debug" -G Ninja
-> ninja -C ./build all
+> ninja -C ${PWD}/build all
 
-### Release
+### Release build
 > cmake -B ${PWD}/build/ -D CMAKE_BUILD_TYPE="Release" -G Ninja
-> ninja -C ./build all
+> ninja -C ${PWD}/build all
 
-## Run app
-> ./build/examples/mwe
+### Run example app
+> ${PWD}/build/examples/mwe
 
-## Run Unit Tests
+### Run Unit Tests
 > export BLOBS_DIR="${PWD}/tests/blobs/"
-> cd build && ctest --verbose
+> ctest --test-dir ${PWD}/build/ --verbose
+
+## Docker container build
+### Debug build
+> docker build -t mwe --target=debug .
+
+### Release build
+> docker build -t mwe --target=release .
+
+### Run example app
+> docker run -it mwe /src/mwe/build/examples/mwe
+
+### Run Unit Tests
+> docker run -it mwe sh -c 'ctest --test-dir /src/mwe/build'
+
+### Enter the container
+> docker run -it mwe bash
