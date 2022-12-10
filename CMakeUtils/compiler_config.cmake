@@ -1,6 +1,17 @@
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+set(CMAKE_CUDA_COMPILER "/usr/local/cuda/bin/nvcc")
+
+enable_language(CUDA)
+include(CheckLanguage)
+check_language(CUDA)
+
+if(NOT DEFINED CMAKE_CUDA_STANDARD)
+  set(CMAKE_CUDA_STANDARD 11)
+  set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+endif()
+
 set(SPECIAL_GTEST_FLAG " -Wno-deprecated-declarations")
 
 set(COMMON_CXX_FLAGS

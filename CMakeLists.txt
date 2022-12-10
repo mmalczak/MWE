@@ -9,7 +9,7 @@ project(
   ${PACKAGE_NAME}
   VERSION ${PACKAGE_VERSION}
   DESCRIPTION "Parallel math libraries"
-  LANGUAGES CXX)
+  LANGUAGES cuda CXX)
 
 if(NOT CMAKE_BUILD_TYPE)
   message(STATUS "No build type defined, defaulting to 'Debug'")
