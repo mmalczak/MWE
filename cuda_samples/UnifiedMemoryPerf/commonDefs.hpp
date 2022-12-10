@@ -36,9 +36,7 @@ extern size_t maxSampleSizeInMb;
 extern int numKernelRuns;
 extern int verboseResults;
 
-extern unsigned int findNumSizesToTest(unsigned int minSize,
-                                       unsigned int maxSize,
-                                       unsigned int multiplier);
+extern unsigned int findNumSizesToTest(unsigned int minSize, unsigned int maxSize, unsigned int multiplier);
 
 // For Tracking the different memory allocation types
 typedef enum memAllocType_enum {
@@ -56,10 +54,7 @@ typedef enum memAllocType_enum {
   MEMALLOC_TYPE_COUNT = MEMALLOC_TYPE_INVALID
 } MemAllocType;
 
-typedef enum bandwidthType_enum {
-  READ_BANDWIDTH,
-  WRITE_BANDWIDTH
-} BandwidthType;
+typedef enum bandwidthType_enum { READ_BANDWIDTH, WRITE_BANDWIDTH } BandwidthType;
 
 extern const char *memAllocTypeStr[];
 extern const char *memAllocTypeShortStr[];
@@ -67,22 +62,14 @@ extern const char *memAllocTypeShortStr[];
 struct resultsData;
 struct testResults;
 
-void createAndInitTestResults(struct testResults **results,
-                              const char *testName,
-                              unsigned int numMeasurements,
-                              unsigned int numSizesToTest);
+void createAndInitTestResults(struct testResults **results, const char *testName, unsigned int numMeasurements, unsigned int numSizesToTest);
 unsigned long *getPtrSizesToTest(struct testResults *results);
 
 void freeTestResultsAndAllResultsData(struct testResults *results);
 
-void createResultDataAndAddToTestResults(struct resultsData **ptrData,
-                                         struct testResults *results,
-                                         const char *resultsName,
-                                         bool printOnlyInVerbose,
+void createResultDataAndAddToTestResults(struct resultsData **ptrData, struct testResults *results, const char *resultsName, bool printOnlyInVerbose,
                                          bool reportAsBandwidth);
-double *getPtrRunTimesInMs(struct resultsData *data, int allocType,
-                           int sizeIndex);
+double *getPtrRunTimesInMs(struct resultsData *data, int allocType, int sizeIndex);
 
-void printResults(struct testResults *results,
-                  bool print_launch_transfer_results, bool print_std_deviation);
+void printResults(struct testResults *results, bool print_launch_transfer_results, bool print_std_deviation);
 #endif

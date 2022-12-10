@@ -59,8 +59,7 @@ struct testResults {
   struct resultsData *resultsDataTail;
 };
 
-unsigned int findNumSizesToTest(unsigned int minSize, unsigned int maxSize,
-                                unsigned int multiplier) {
+unsigned int findNumSizesToTest(unsigned int minSize, unsigned int maxSize, unsigned int multiplier) {
   unsigned int numSizesToTest = 0;
   while (minSize <= maxSize) {
     numSizesToTest++;
@@ -69,42 +68,29 @@ unsigned int findNumSizesToTest(unsigned int minSize, unsigned int maxSize,
   return numSizesToTest;
 }
 
-int compareDoubles(const void *ptr1, const void *ptr2) {
-  return (*(double *)ptr1 > *(double *)ptr2) ? 1 : -1;
-}
+int compareDoubles(const void *ptr1, const void *ptr2) { return (*(double *)ptr1 > *(double *)ptr2) ? 1 : -1; }
 
-static inline double getTimeOrBandwidth(double runTimeInMs, unsigned long size,
-                                        bool getBandwidth) {
+static inline double getTimeOrBandwidth(double runTimeInMs, unsigned long size, bool getBandwidth) {
   return (getBandwidth) ? (1000 * (size / runTimeInMs)) / ONE_MB : runTimeInMs;
 }
 
-void createAndInitTestResults(struct testResults **ptrResults,
-                              const char *testName,
-                              unsigned int numMeasurements,
-                              unsigned int numSizesToTest) {
-  unsigned int i;
+void createAndInitTestResults(struct testResults **ptrResults, const char *testName, unsigned int numMeasurements, unsigned int numSizesToTest) {
   struct testResults *results;
   results = (struct testResults *)malloc(sizeof(struct testResults));
   memset(results, 0, sizeof(struct testResults));
   strcpy(results->testName, testName);
   results->numMeasurements = numMeasurements;
   results->numSizesToTest = numSizesToTest;
-  results->sizesToTest =
-      (unsigned long *)malloc(numSizesToTest * sizeof(unsigned long));
+  results->sizesToTest = (unsigned long *)malloc(numSizesToTest * sizeof(unsigned long));
   results->resultsDataHead = NULL;
   results->resultsDataTail = NULL;
 
   *ptrResults = results;
 }
 
-unsigned long *getPtrSizesToTest(struct testResults *results) {
-  return results->sizesToTest;
-}
+unsigned long *getPtrSizesToTest(struct testResults *results) { return results->sizesToTest; }
 
-void createResultDataAndAddToTestResults(struct resultsData **ptrData,
-                                         struct testResults *results,
-                                         const char *resultsName,
-                                         bool printOnlyInVerbose,
+void createResultDataAndAddToTestResults(struct resultsData **ptrData, struct testResults *results, const char *resultsName, bool printOnlyInVerbose,
                                          bool reportAsBandwidth) {
   unsigned int i, j;
   struct resultsData *data;
@@ -113,18 +99,13 @@ void createResultDataAndAddToTestResults(struct resultsData **ptrData,
   strcpy(data->resultsName, resultsName);
   data->results = results;
   for (i = 0; i < MEMALLOC_TYPE_COUNT; i++) {
-    data->runTimesInMs[i] =
-        (double **)malloc(results->numSizesToTest * sizeof(double *));
+    data->runTimesInMs[i] = (double **)malloc(results->numSizesToTest * sizeof(double *));
     for (j = 0; j < results->numSizesToTest; j++) {
-      data->runTimesInMs[i][j] =
-          (double *)malloc(results->numMeasurements * sizeof(double));
+      data->runTimesInMs[i][j] = (double *)malloc(results->numMeasurements * sizeof(double));
     }
-    data->averageRunTimesInMs[i] =
-        (double *)malloc(results->numSizesToTest * sizeof(double));
-    data->stdDevRunTimesInMs[i] =
-        (double *)malloc(results->numSizesToTest * sizeof(double));
-    data->stdDevBandwidthInMBps[i] =
-        (double *)malloc(results->numSizesToTest * sizeof(double));
+    data->averageRunTimesInMs[i] = (double *)malloc(results->numSizesToTest * sizeof(double));
+    data->stdDevRunTimesInMs[i] = (double *)malloc(results->numSizesToTest * sizeof(double));
+    data->stdDevBandwidthInMBps[i] = (double *)malloc(results->numSizesToTest * sizeof(double));
   }
   data->printOnlyInVerbose = printOnlyInVerbose;
   data->reportAsBandwidth = reportAsBandwidth;
@@ -139,10 +120,7 @@ void createResultDataAndAddToTestResults(struct resultsData **ptrData,
   }
 }
 
-double *getPtrRunTimesInMs(struct resultsData *data, int allocType,
-                           int sizeIndex) {
-  return data->runTimesInMs[allocType][sizeIndex];
-}
+double *getPtrRunTimesInMs(struct resultsData *data, int allocType, int sizeIndex) { return data->runTimesInMs[allocType][sizeIndex]; }
 
 void freeTestResultsAndAllResultsData(struct testResults *results) {
   struct resultsData *data, *dataToFree;
@@ -165,8 +143,7 @@ void freeTestResultsAndAllResultsData(struct testResults *results) {
   free(results);
 }
 
-void calculateAverageAndStdDev(double *pAverage, double *pStdDev,
-                               double *allResults, unsigned int count) {
+void calculateAverageAndStdDev(double *pAverage, double *pStdDev, double *allResults, unsigned int count) {
   unsigned int i;
   double average = 0.0;
   double stdDev = 0.0;
@@ -183,8 +160,7 @@ void calculateAverageAndStdDev(double *pAverage, double *pStdDev,
   *pStdDev = (average == 0.0) ? 0.0 : ((100.0 * stdDev) / average);
 }
 
-void calculateStdDevBandwidth(double *pStdDev, double *allResults,
-                              unsigned int count, unsigned long size) {
+void calculateStdDevBandwidth(double *pStdDev, double *allResults, unsigned int count, unsigned long size) {
   unsigned int i;
   double bandwidth;
   double average = 0.0;
@@ -203,9 +179,7 @@ void calculateStdDevBandwidth(double *pStdDev, double *allResults,
   *pStdDev = (average == 0.0) ? 0.0 : ((100.0 * stdDev) / average);
 }
 
-void printTimesInTableFormat(struct testResults *results,
-                             struct resultsData *data, bool printAverage,
-                             bool printStdDev) {
+void printTimesInTableFormat(struct testResults *results, struct resultsData *data, bool printAverage, bool printStdDev) {
   unsigned int i, j;
   bool printStdDevBandwidth = printStdDev && data->reportAsBandwidth;
   printf("Size_KB");
@@ -217,19 +191,15 @@ void printTimesInTableFormat(struct testResults *results,
     printf("%lu", results->sizesToTest[j] / ONE_KB);
     for (i = 0; i < MEMALLOC_TYPE_COUNT; i++) {
       printf(data->reportAsBandwidth ? "\t%7.2lf" : "\t%7.3lf",
-             printStdDevBandwidth
-                 ? data->stdDevBandwidthInMBps[i][j]
-                 : getTimeOrBandwidth(
-                       printAverage ? data->averageRunTimesInMs[i][j]
-                                    : data->stdDevRunTimesInMs[i][j],
-                       results->sizesToTest[j], data->reportAsBandwidth));
+             printStdDevBandwidth ? data->stdDevBandwidthInMBps[i][j]
+                                  : getTimeOrBandwidth(printAverage ? data->averageRunTimesInMs[i][j] : data->stdDevRunTimesInMs[i][j],
+                                                       results->sizesToTest[j], data->reportAsBandwidth));
     }
     printf("\n");
   }
 }
 
-void printAllResultsInVerboseMode(struct testResults *results,
-                                  struct resultsData *data) {
+void printAllResultsInVerboseMode(struct testResults *results, struct resultsData *data) {
   unsigned int i, j, k;
   for (i = 0; i < MEMALLOC_TYPE_COUNT; i++) {
     printf("Verbose mode, printing all results for %s\n", memAllocTypeStr[i]);
@@ -242,25 +212,17 @@ void printAllResultsInVerboseMode(struct testResults *results,
       printf("%u", k);
       for (j = 0; j < results->numSizesToTest; j++) {
         printf(data->reportAsBandwidth ? "\t%7.2lf" : "\t%7.3lf",
-               getTimeOrBandwidth(data->runTimesInMs[i][j][k],
-                                  results->sizesToTest[j],
-                                  data->reportAsBandwidth));
+               getTimeOrBandwidth(data->runTimesInMs[i][j][k], results->sizesToTest[j], data->reportAsBandwidth));
       }
       printf("\n");
     }
   }
 }
 
-void printResults(struct testResults *results,
-                  bool print_launch_transfer_results,
-                  bool print_std_deviation) {
-  char vulcanPrint[256];
-  char resultNameNoSpaces[64];
-  unsigned int i, j, k;
+void printResults(struct testResults *results, bool print_launch_transfer_results, bool print_std_deviation) {
+  unsigned int i, j;
   struct resultsData *resultsIter;
-  bool sizeGreaterThan1MB;
-  for (resultsIter = results->resultsDataHead; resultsIter != NULL;
-       resultsIter = resultsIter->next) {
+  for (resultsIter = results->resultsDataHead; resultsIter != NULL; resultsIter = resultsIter->next) {
     if (!verboseResults && resultsIter->printOnlyInVerbose) {
       continue;
     }
@@ -274,26 +236,18 @@ void printResults(struct testResults *results,
     printf("\n");
     for (j = 0; j < results->numSizesToTest; j++) {
       for (i = 0; i < MEMALLOC_TYPE_COUNT; i++) {
-        calculateAverageAndStdDev(&resultsIter->averageRunTimesInMs[i][j],
-                                  &resultsIter->stdDevRunTimesInMs[i][j],
-                                  resultsIter->runTimesInMs[i][j],
+        calculateAverageAndStdDev(&resultsIter->averageRunTimesInMs[i][j], &resultsIter->stdDevRunTimesInMs[i][j], resultsIter->runTimesInMs[i][j],
                                   results->numMeasurements);
         if (resultsIter->reportAsBandwidth) {
-          calculateStdDevBandwidth(&resultsIter->stdDevBandwidthInMBps[i][j],
-                                   resultsIter->runTimesInMs[i][j],
-                                   results->numMeasurements,
+          calculateStdDevBandwidth(&resultsIter->stdDevBandwidthInMBps[i][j], resultsIter->runTimesInMs[i][j], results->numMeasurements,
                                    results->sizesToTest[j]);
         }
       }
     }
-    printf("\nPrinting Average of %u measurements in (%s)\n",
-           results->numMeasurements,
-           resultsIter->reportAsBandwidth ? UNITS_BW : UNITS_Time);
+    printf("\nPrinting Average of %u measurements in (%s)\n", results->numMeasurements, resultsIter->reportAsBandwidth ? UNITS_BW : UNITS_Time);
     printTimesInTableFormat(results, resultsIter, true, false);
     if (print_std_deviation) {
-      printf(
-          "\nPrinting Standard Deviation as %% of average of %u measurements\n",
-          results->numMeasurements);
+      printf("\nPrinting Standard Deviation as %% of average of %u measurements\n", results->numMeasurements);
       printTimesInTableFormat(results, resultsIter, false, true);
     }
     if (verboseResults) {
