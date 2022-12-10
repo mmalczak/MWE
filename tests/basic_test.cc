@@ -61,7 +61,7 @@ public:
 TEST_F(BasicTest, basicSquare) {
   float A[4] = {1, 2, 3, 4};
   float B[4] = {1, 2, 3, 4};
-  float C[4] = {7, 10, 15, 22};
+  float C[4] = {6, 10, 15, 22};
   int32_t M = 2;
   int32_t P = 2;
   int32_t N = 2;
