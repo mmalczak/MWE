@@ -13,7 +13,7 @@
 > ninja -C ${PWD}/build all
 
 ### Run example app
-> ${PWD}/build/examples/basic_sample/mwe
+> ${PWD}/build/examples/basic_sample/basic_sample
 
 ### Run Unit Tests
 > export BLOBS_DIR="${PWD}/tests/blobs/"
@@ -27,7 +27,7 @@
 > docker build -t mwe --target=release .
 
 ### Run example app
-> docker run -it mwe /src/mwe/build/examples/basic_sample/mwe
+> docker run -it mwe /src/mwe/build/examples/basic_sample/basic_sample
 
 ### Run Unit Tests
 > docker run -it mwe sh -c 'ctest --test-dir /src/mwe/build'
