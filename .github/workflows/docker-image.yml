@@ -26,4 +26,4 @@ jobs:
       with:
         cuda: '11.7.0'
 
-    - run: nvcc -V
+      run: nvcc -V
