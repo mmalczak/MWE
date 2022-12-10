@@ -1,7 +1,7 @@
 #!/bin/sh
 
 echo "C/C++ code formatting..."
-find -type f -not -path "./build/*" -name "*.cc" -o -name "*.hpp" -o -name "*.cpp" | xargs clang-format -i -Werror
+find -type f -not -path "./build/*" -name "*.cc" -o -name "*.hpp" -o -name "*.cpp" -o -name "*.cu" | xargs clang-format -i -Werror
 echo "Done"
 
 #echo "Python code formatting..."

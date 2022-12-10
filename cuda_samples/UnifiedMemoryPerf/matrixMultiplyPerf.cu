@@ -36,25 +36,24 @@ size_t maxSampleSizeInMb = 64;
 int numKernelRuns = 20;
 int verboseResults = 0;
 
-const char *memAllocTypeStr[MEMALLOC_TYPE_COUNT] = {
-    "Managed_Memory_With_Hints",
-    "Managed_Memory_With_Hints_FullyAsync",
-    "Managed_Memory_NoHints",
-    "Zero_Copy",
-    "Memcpy_HostMalloc_DeviceCudaMalloc",
-    "MemcpyAsync_HostMalloc_DeviceCudaMalloc",
-    "Memcpy_HostCudaHostAlloc_DeviceCudaMalloc",
-    "MemcpyAsync_HostCudaHostAlloc_DeviceCudaMalloc"};
+const char *memAllocTypeStr[MEMALLOC_TYPE_COUNT] = {"Managed_Memory_With_Hints",
+                                                    "Managed_Memory_With_Hints_FullyAsync",
+                                                    "Managed_Memory_NoHints",
+                                                    "Zero_Copy",
+                                                    "Memcpy_HostMalloc_DeviceCudaMalloc",
+                                                    "MemcpyAsync_HostMalloc_DeviceCudaMalloc",
+                                                    "Memcpy_HostCudaHostAlloc_DeviceCudaMalloc",
+                                                    "MemcpyAsync_HostCudaHostAlloc_DeviceCudaMalloc"};
 
 const char *memAllocTypeShortStr[MEMALLOC_TYPE_COUNT] = {
-    "UMhint",   // Managed Memory With Hints
-    "UMhntAs",  // Managed Memory With_Hints Async
-    "UMeasy",   // Managed_Memory with No Hints
-    "0Copy",    // Zero Copy
-    "MemCopy",  // USE HOST PAGEABLE AND DEVICE_MEMORY
-    "CpAsync",  // USE HOST PAGEABLE AND DEVICE_MEMORY ASYNC
-    "CpHpglk",  // USE HOST PAGELOCKED AND DEVICE MEMORY
-    "CpPglAs"   // USE HOST PAGELOCKED AND DEVICE MEMORY ASYNC
+  "UMhint",  // Managed Memory With Hints
+  "UMhntAs", // Managed Memory With_Hints Async
+  "UMeasy",  // Managed_Memory with No Hints
+  "0Copy",   // Zero Copy
+  "MemCopy", // USE HOST PAGEABLE AND DEVICE_MEMORY
+  "CpAsync", // USE HOST PAGEABLE AND DEVICE_MEMORY ASYNC
+  "CpHpglk", // USE HOST PAGELOCKED AND DEVICE MEMORY
+  "CpPglAs"  // USE HOST PAGELOCKED AND DEVICE MEMORY ASYNC
 };
 
 static float RandFloat(float low, float high) {
@@ -72,8 +71,7 @@ void fillMatrixWithRandomValues(float *matrix, unsigned int matrixDim) {
 }
 
 #if VERIFY_GPU_CORRECTNESS
-void verifyMatrixMultiplyCorrectness(float *C, float *A, float *B,
-                                     unsigned int matrixDim) {
+void verifyMatrixMultiplyCorrectness(float *C, float *A, float *B, unsigned int matrixDim) {
   unsigned int i, j, k, numErrors = 0;
   for (i = 0; i < matrixDim; ++i) {
     for (j = 0; j < matrixDim; ++j) {
@@ -82,8 +80,7 @@ void verifyMatrixMultiplyCorrectness(float *C, float *A, float *B,
         result += A[k + i * matrixDim] * B[j + k * matrixDim];
       }
       if (fabs(C[j + i * matrixDim] - result) > 0.001 * matrixDim) {
-        printf("At [%u, %u]: Expected %f, Found %f\n", i, j, result,
-               C[j + i * matrixDim]);
+        printf("At [%u, %u]: Expected %f, Found %f\n", i, j, result, C[j + i * matrixDim]);
         ++numErrors;
       }
     }
@@ -91,7 +88,7 @@ void verifyMatrixMultiplyCorrectness(float *C, float *A, float *B,
   if (numErrors != 0) {
     printf("%d value mismatches occured\n", numErrors);
     fflush(stdout);
-    exit(EXIT_FAILURE);  // exit since value mismatches occured
+    exit(EXIT_FAILURE); // exit since value mismatches occured
   }
 }
 #endif
@@ -101,17 +98,14 @@ void copyMatrix(float *dstMatrix, float *srcMatrix, unsigned int matrixDim) {
   memcpy(dstMatrix, srcMatrix, size);
 }
 
-void verifyMatrixData(float *expectedData, float *observedData,
-                      unsigned int matrixDim) {
+void verifyMatrixData(float *expectedData, float *observedData, unsigned int matrixDim) {
   unsigned int i, j, numErrors = 0;
   for (i = 0; i < matrixDim; ++i) {
     for (j = 0; j < matrixDim; ++j) {
       if (expectedData[j + i * matrixDim] != observedData[j + i * matrixDim]) {
         ++numErrors;
         if (verboseResults) {
-          printf("At [%u, %u]: Expected %f, Found %f\n", i, j,
-                 expectedData[j + i * matrixDim],
-                 observedData[j + i * matrixDim]);
+          printf("At [%u, %u]: Expected %f, Found %f\n", i, j, expectedData[j + i * matrixDim], observedData[j + i * matrixDim]);
         }
       }
     }
@@ -119,13 +113,12 @@ void verifyMatrixData(float *expectedData, float *observedData,
   if (numErrors != 0) {
     printf("%d value mismatches occured\n", numErrors);
     fflush(stdout);
-    exit(EXIT_FAILURE);  // exit since value mismatches occured
+    exit(EXIT_FAILURE); // exit since value mismatches occured
   }
 }
 
 #define BLOCK_SIZE 32
-__global__ void matrixMultiplyKernel(float *C, float *A, float *B,
-                                     unsigned int matrixDim) {
+__global__ void matrixMultiplyKernel(float *C, float *A, float *B, unsigned int matrixDim) {
   // Block index
   int bx = blockIdx.x;
   int by = blockIdx.y;
@@ -197,14 +190,9 @@ __global__ void matrixMultiplyKernel(float *C, float *A, float *B,
   C[c + wB * ty + tx] = Csub;
 }
 
-void runMatrixMultiplyKernel(unsigned int matrixDim, int allocType,
-                             unsigned int numLoops, double *gpuLaunchCallsTimes,
-                             double *gpuTransferToCallsTimes,
-                             double *gpuTransferFromCallsTimes,
-                             double *gpuLaunchAndTransferCallsTimes,
-                             double *gpuLaunchTransferSyncTimes,
-                             double *cpuAccessTimes, double *overallTimes,
-                             int device_id) {
+void runMatrixMultiplyKernel(unsigned int matrixDim, int allocType, unsigned int numLoops, double *gpuLaunchCallsTimes,
+                             double *gpuTransferToCallsTimes, double *gpuTransferFromCallsTimes, double *gpuLaunchAndTransferCallsTimes,
+                             double *gpuLaunchTransferSyncTimes, double *cpuAccessTimes, double *overallTimes, int device_id) {
   float *dptrA = NULL, *hptrA = NULL;
   float *dptrB = NULL, *hptrB = NULL;
   float *dptrC = NULL, *hptrC = NULL;
@@ -232,19 +220,19 @@ void runMatrixMultiplyKernel(unsigned int matrixDim, int allocType,
 
   randValuesX = (float *)malloc(size);
   if (!randValuesX) {
-    exit(EXIT_FAILURE);  // exit since memory allocation error
+    exit(EXIT_FAILURE); // exit since memory allocation error
   }
   randValuesY = (float *)malloc(size);
   if (!randValuesY) {
-    exit(EXIT_FAILURE);  // exit since memory allocation error
+    exit(EXIT_FAILURE); // exit since memory allocation error
   }
   randValuesVerifyXmulY = (float *)malloc(size);
   if (!randValuesVerifyXmulY) {
-    exit(EXIT_FAILURE);  // exit since memory allocation error
+    exit(EXIT_FAILURE); // exit since memory allocation error
   }
   randValuesVerifyYmulX = (float *)malloc(size);
   if (!randValuesVerifyYmulX) {
-    exit(EXIT_FAILURE);  // exit since memory allocation error
+    exit(EXIT_FAILURE); // exit since memory allocation error
   }
   checkCudaErrors(cudaMalloc(&dptrA, size));
   checkCudaErrors(cudaMalloc(&dptrB, size));
@@ -253,23 +241,17 @@ void runMatrixMultiplyKernel(unsigned int matrixDim, int allocType,
   fillMatrixWithRandomValues(randValuesX, matrixDim);
   fillMatrixWithRandomValues(randValuesY, matrixDim);
 
-  checkCudaErrors(
-      cudaMemcpyAsync(dptrA, randValuesX, size, cudaMemcpyHostToDevice));
-  checkCudaErrors(
-      cudaMemcpyAsync(dptrB, randValuesY, size, cudaMemcpyHostToDevice));
+  checkCudaErrors(cudaMemcpyAsync(dptrA, randValuesX, size, cudaMemcpyHostToDevice));
+  checkCudaErrors(cudaMemcpyAsync(dptrB, randValuesY, size, cudaMemcpyHostToDevice));
   matrixMultiplyKernel<<<grid, threads>>>(dptrC, dptrA, dptrB, matrixDim);
-  checkCudaErrors(cudaMemcpyAsync(randValuesVerifyXmulY, dptrC, size,
-                                  cudaMemcpyDeviceToHost));
+  checkCudaErrors(cudaMemcpyAsync(randValuesVerifyXmulY, dptrC, size, cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaStreamSynchronize(NULL));
   matrixMultiplyKernel<<<grid, threads>>>(dptrC, dptrB, dptrA, matrixDim);
-  checkCudaErrors(cudaMemcpyAsync(randValuesVerifyYmulX, dptrC, size,
-                                  cudaMemcpyDeviceToHost));
+  checkCudaErrors(cudaMemcpyAsync(randValuesVerifyYmulX, dptrC, size, cudaMemcpyDeviceToHost));
   checkCudaErrors(cudaStreamSynchronize(NULL));
 #if VERIFY_GPU_CORRECTNESS
-  verifyMatrixMultiplyCorrectness(randValuesVerifyXmulY, randValuesX,
-                                  randValuesY, matrixDim);
-  verifyMatrixMultiplyCorrectness(randValuesVerifyYmulX, randValuesY,
-                                  randValuesX, matrixDim);
+  verifyMatrixMultiplyCorrectness(randValuesVerifyXmulY, randValuesX, randValuesY, matrixDim);
+  verifyMatrixMultiplyCorrectness(randValuesVerifyYmulX, randValuesY, randValuesX, matrixDim);
 #endif
   checkCudaErrors(cudaFree(dptrA));
   checkCudaErrors(cudaFree(dptrB));
@@ -278,81 +260,80 @@ void runMatrixMultiplyKernel(unsigned int matrixDim, int allocType,
   checkCudaErrors(cudaMallocHost(&latch, sizeof(unsigned int)));
 
   switch (allocType) {
-    case USE_HOST_PAGEABLE_AND_DEVICE_MEMORY:
-    case USE_HOST_PAGEABLE_AND_DEVICE_MEMORY_ASYNC:
-      hptrA = (float *)malloc(size);
-      if (!hptrA) {
-        exit(EXIT_FAILURE);  // exit since memory allocation error
-      }
-      hptrB = (float *)malloc(size);
-      if (!hptrB) {
-        exit(EXIT_FAILURE);  // exit since memory allocation error
-      }
-      hptrC = (float *)malloc(size);
-      if (!hptrC) {
-        exit(EXIT_FAILURE);  // exit since memory allocation error
-      }
-      checkCudaErrors(cudaMalloc(&dptrA, size));
-      checkCudaErrors(cudaMalloc(&dptrB, size));
-      checkCudaErrors(cudaMalloc(&dptrC, size));
-      copyRequired = true;
-      break;
+  case USE_HOST_PAGEABLE_AND_DEVICE_MEMORY:
+  case USE_HOST_PAGEABLE_AND_DEVICE_MEMORY_ASYNC:
+    hptrA = (float *)malloc(size);
+    if (!hptrA) {
+      exit(EXIT_FAILURE); // exit since memory allocation error
+    }
+    hptrB = (float *)malloc(size);
+    if (!hptrB) {
+      exit(EXIT_FAILURE); // exit since memory allocation error
+    }
+    hptrC = (float *)malloc(size);
+    if (!hptrC) {
+      exit(EXIT_FAILURE); // exit since memory allocation error
+    }
+    checkCudaErrors(cudaMalloc(&dptrA, size));
+    checkCudaErrors(cudaMalloc(&dptrB, size));
+    checkCudaErrors(cudaMalloc(&dptrC, size));
+    copyRequired = true;
+    break;
 
-    case USE_HOST_PAGELOCKED_AND_DEVICE_MEMORY:
-    case USE_HOST_PAGELOCKED_AND_DEVICE_MEMORY_ASYNC:
-      checkCudaErrors(cudaMallocHost(&hptrA, size));
-      checkCudaErrors(cudaMallocHost(&hptrB, size));
-      checkCudaErrors(cudaMallocHost(&hptrC, size));
-      checkCudaErrors(cudaMalloc(&dptrA, size));
-      checkCudaErrors(cudaMalloc(&dptrB, size));
-      checkCudaErrors(cudaMalloc(&dptrC, size));
-      copyRequired = true;
-      break;
+  case USE_HOST_PAGELOCKED_AND_DEVICE_MEMORY:
+  case USE_HOST_PAGELOCKED_AND_DEVICE_MEMORY_ASYNC:
+    checkCudaErrors(cudaMallocHost(&hptrA, size));
+    checkCudaErrors(cudaMallocHost(&hptrB, size));
+    checkCudaErrors(cudaMallocHost(&hptrC, size));
+    checkCudaErrors(cudaMalloc(&dptrA, size));
+    checkCudaErrors(cudaMalloc(&dptrB, size));
+    checkCudaErrors(cudaMalloc(&dptrC, size));
+    copyRequired = true;
+    break;
 
-    case USE_ZERO_COPY:
-      checkCudaErrors(cudaMallocHost(&hptrA, size));
-      checkCudaErrors(cudaMallocHost(&hptrB, size));
-      checkCudaErrors(cudaMallocHost(&hptrC, size));
-      checkCudaErrors(cudaHostGetDevicePointer(&dptrA, hptrA, 0));
-      checkCudaErrors(cudaHostGetDevicePointer(&dptrB, hptrB, 0));
-      checkCudaErrors(cudaHostGetDevicePointer(&dptrC, hptrC, 0));
-      break;
+  case USE_ZERO_COPY:
+    checkCudaErrors(cudaMallocHost(&hptrA, size));
+    checkCudaErrors(cudaMallocHost(&hptrB, size));
+    checkCudaErrors(cudaMallocHost(&hptrC, size));
+    checkCudaErrors(cudaHostGetDevicePointer(&dptrA, hptrA, 0));
+    checkCudaErrors(cudaHostGetDevicePointer(&dptrB, hptrB, 0));
+    checkCudaErrors(cudaHostGetDevicePointer(&dptrC, hptrC, 0));
+    break;
 
-    case USE_MANAGED_MEMORY:
+  case USE_MANAGED_MEMORY:
+    checkCudaErrors(cudaMallocManaged(&dptrA, size));
+    checkCudaErrors(cudaMallocManaged(&dptrB, size));
+    checkCudaErrors(cudaMallocManaged(&dptrC, size));
+    hptrA = dptrA;
+    hptrB = dptrB;
+    hptrC = dptrC;
+    break;
+
+  case USE_MANAGED_MEMORY_WITH_HINTS:
+  case USE_MANAGED_MEMORY_WITH_HINTS_ASYNC:
+    if (deviceProp.concurrentManagedAccess) {
       checkCudaErrors(cudaMallocManaged(&dptrA, size));
       checkCudaErrors(cudaMallocManaged(&dptrB, size));
       checkCudaErrors(cudaMallocManaged(&dptrC, size));
-      hptrA = dptrA;
-      hptrB = dptrB;
-      hptrC = dptrC;
-      break;
+      checkCudaErrors(cudaMemPrefetchAsync(dptrA, size, cudaCpuDeviceId));
+      checkCudaErrors(cudaMemPrefetchAsync(dptrB, size, cudaCpuDeviceId));
+      checkCudaErrors(cudaMemPrefetchAsync(dptrC, size, cudaCpuDeviceId));
+    } else {
+      checkCudaErrors(cudaMallocManaged(&dptrA, size, cudaMemAttachHost));
+      checkCudaErrors(cudaMallocManaged(&dptrB, size, cudaMemAttachHost));
+      checkCudaErrors(cudaMallocManaged(&dptrC, size, cudaMemAttachHost));
+    }
+    hptrA = dptrA;
+    hptrB = dptrB;
+    hptrC = dptrC;
+    hintsRequired = true;
+    break;
 
-    case USE_MANAGED_MEMORY_WITH_HINTS:
-    case USE_MANAGED_MEMORY_WITH_HINTS_ASYNC:
-      if (deviceProp.concurrentManagedAccess) {
-        checkCudaErrors(cudaMallocManaged(&dptrA, size));
-        checkCudaErrors(cudaMallocManaged(&dptrB, size));
-        checkCudaErrors(cudaMallocManaged(&dptrC, size));
-        checkCudaErrors(cudaMemPrefetchAsync(dptrA, size, cudaCpuDeviceId));
-        checkCudaErrors(cudaMemPrefetchAsync(dptrB, size, cudaCpuDeviceId));
-        checkCudaErrors(cudaMemPrefetchAsync(dptrC, size, cudaCpuDeviceId));
-      } else {
-        checkCudaErrors(cudaMallocManaged(&dptrA, size, cudaMemAttachHost));
-        checkCudaErrors(cudaMallocManaged(&dptrB, size, cudaMemAttachHost));
-        checkCudaErrors(cudaMallocManaged(&dptrC, size, cudaMemAttachHost));
-      }
-      hptrA = dptrA;
-      hptrB = dptrB;
-      hptrC = dptrC;
-      hintsRequired = true;
-      break;
-
-    default:
-      exit(EXIT_FAILURE);  // exit with error
+  default:
+    exit(EXIT_FAILURE); // exit with error
   }
 
-  if (allocType == USE_HOST_PAGEABLE_AND_DEVICE_MEMORY_ASYNC ||
-      allocType == USE_HOST_PAGELOCKED_AND_DEVICE_MEMORY_ASYNC ||
+  if (allocType == USE_HOST_PAGEABLE_AND_DEVICE_MEMORY_ASYNC || allocType == USE_HOST_PAGELOCKED_AND_DEVICE_MEMORY_ASYNC ||
       allocType == USE_MANAGED_MEMORY_WITH_HINTS_ASYNC) {
     isAsync = true;
   }
@@ -389,32 +370,22 @@ void runMatrixMultiplyKernel(unsigned int matrixDim, int allocType,
       sdkStartTimer(&gpuTransferCallsTimer);
       if (copyRequired) {
         if (isAsync) {
-          checkCudaErrors(cudaMemcpyAsync(
-              dptrA, hptrA, size, cudaMemcpyHostToDevice, streamToRunOn));
-          checkCudaErrors(cudaMemcpyAsync(
-              dptrB, hptrB, size, cudaMemcpyHostToDevice, streamToRunOn));
+          checkCudaErrors(cudaMemcpyAsync(dptrA, hptrA, size, cudaMemcpyHostToDevice, streamToRunOn));
+          checkCudaErrors(cudaMemcpyAsync(dptrB, hptrB, size, cudaMemcpyHostToDevice, streamToRunOn));
         } else {
-          checkCudaErrors(
-              cudaMemcpy(dptrA, hptrA, size, cudaMemcpyHostToDevice));
-          checkCudaErrors(
-              cudaMemcpy(dptrB, hptrB, size, cudaMemcpyHostToDevice));
+          checkCudaErrors(cudaMemcpy(dptrA, hptrA, size, cudaMemcpyHostToDevice));
+          checkCudaErrors(cudaMemcpy(dptrB, hptrB, size, cudaMemcpyHostToDevice));
         }
       }
       if (hintsRequired) {
         if (deviceProp.concurrentManagedAccess) {
-          checkCudaErrors(
-              cudaMemPrefetchAsync(dptrA, size, device_id, streamToRunOn));
-          checkCudaErrors(
-              cudaMemPrefetchAsync(dptrB, size, device_id, streamToRunOn));
-          checkCudaErrors(
-              cudaMemPrefetchAsync(dptrC, size, device_id, streamToRunOn));
+          checkCudaErrors(cudaMemPrefetchAsync(dptrA, size, device_id, streamToRunOn));
+          checkCudaErrors(cudaMemPrefetchAsync(dptrB, size, device_id, streamToRunOn));
+          checkCudaErrors(cudaMemPrefetchAsync(dptrC, size, device_id, streamToRunOn));
         } else {
-          checkCudaErrors(cudaStreamAttachMemAsync(streamToRunOn, dptrA, 0,
-                                                   cudaMemAttachGlobal));
-          checkCudaErrors(cudaStreamAttachMemAsync(streamToRunOn, dptrB, 0,
-                                                   cudaMemAttachGlobal));
-          checkCudaErrors(cudaStreamAttachMemAsync(streamToRunOn, dptrC, 0,
-                                                   cudaMemAttachGlobal));
+          checkCudaErrors(cudaStreamAttachMemAsync(streamToRunOn, dptrA, 0, cudaMemAttachGlobal));
+          checkCudaErrors(cudaStreamAttachMemAsync(streamToRunOn, dptrB, 0, cudaMemAttachGlobal));
+          checkCudaErrors(cudaStreamAttachMemAsync(streamToRunOn, dptrC, 0, cudaMemAttachGlobal));
         }
         if (!isAsync) {
           checkCudaErrors(cudaStreamSynchronize(streamToRunOn));
@@ -422,15 +393,13 @@ void runMatrixMultiplyKernel(unsigned int matrixDim, int allocType,
       }
 
       sdkStopTimer(&gpuTransferCallsTimer);
-      gpuTransferToCallsTimes[i] +=
-          sdkGetAverageTimerValue(&gpuTransferCallsTimer);
+      gpuTransferToCallsTimes[i] += sdkGetAverageTimerValue(&gpuTransferCallsTimer);
       sdkResetTimer(&gpuTransferCallsTimer);
     }
 
     sdkStartTimer(&gpuLaunchCallsTimer);
     {
-      matrixMultiplyKernel<<<grid, threads, 0, streamToRunOn>>>(
-          dptrC, dptrA, dptrB, matrixDim);
+      matrixMultiplyKernel<<<grid, threads, 0, streamToRunOn>>>(dptrC, dptrA, dptrB, matrixDim);
       if (!isAsync) {
         checkCudaErrors(cudaStreamSynchronize(streamToRunOn));
       }
@@ -448,12 +417,9 @@ void runMatrixMultiplyKernel(unsigned int matrixDim, int allocType,
           checkCudaErrors(cudaMemPrefetchAsync(dptrB, size, cudaCpuDeviceId));
           checkCudaErrors(cudaMemPrefetchAsync(dptrC, size, cudaCpuDeviceId));
         } else {
-          checkCudaErrors(cudaStreamAttachMemAsync(streamToRunOn, dptrA, 0,
-                                                   cudaMemAttachHost));
-          checkCudaErrors(cudaStreamAttachMemAsync(streamToRunOn, dptrB, 0,
-                                                   cudaMemAttachHost));
-          checkCudaErrors(cudaStreamAttachMemAsync(streamToRunOn, dptrC, 0,
-                                                   cudaMemAttachHost));
+          checkCudaErrors(cudaStreamAttachMemAsync(streamToRunOn, dptrA, 0, cudaMemAttachHost));
+          checkCudaErrors(cudaStreamAttachMemAsync(streamToRunOn, dptrB, 0, cudaMemAttachHost));
+          checkCudaErrors(cudaStreamAttachMemAsync(streamToRunOn, dptrC, 0, cudaMemAttachHost));
         }
         if (!isAsync) {
           checkCudaErrors(cudaStreamSynchronize(streamToRunOn));
@@ -461,21 +427,16 @@ void runMatrixMultiplyKernel(unsigned int matrixDim, int allocType,
       }
       if (copyRequired) {
         if (isAsync) {
-          checkCudaErrors(cudaMemcpyAsync(
-              hptrC, dptrC, size, cudaMemcpyDeviceToHost, streamToRunOn));
+          checkCudaErrors(cudaMemcpyAsync(hptrC, dptrC, size, cudaMemcpyDeviceToHost, streamToRunOn));
         } else {
-          checkCudaErrors(
-              cudaMemcpy(hptrC, dptrC, size, cudaMemcpyDeviceToHost));
+          checkCudaErrors(cudaMemcpy(hptrC, dptrC, size, cudaMemcpyDeviceToHost));
         }
       }
       sdkStopTimer(&gpuTransferCallsTimer);
-      gpuTransferFromCallsTimes[i] +=
-          sdkGetAverageTimerValue(&gpuTransferCallsTimer);
+      gpuTransferFromCallsTimes[i] += sdkGetAverageTimerValue(&gpuTransferCallsTimer);
       sdkResetTimer(&gpuTransferCallsTimer);
     }
-    gpuLaunchAndTransferCallsTimes[i] = gpuLaunchCallsTimes[i] +
-                                        gpuTransferToCallsTimes[i] +
-                                        gpuTransferFromCallsTimes[i];
+    gpuLaunchAndTransferCallsTimes[i] = gpuLaunchCallsTimes[i] + gpuTransferToCallsTimes[i] + gpuTransferFromCallsTimes[i];
     gpuLaunchTransferSyncTimes[i] = gpuLaunchAndTransferCallsTimes[i];
     if (isAsync) {
       sdkStartTimer(&gpuSyncTimer);
@@ -491,11 +452,7 @@ void runMatrixMultiplyKernel(unsigned int matrixDim, int allocType,
     }
 
     sdkStartTimer(&cpuAccessTimer);
-    {
-      verifyMatrixData(
-          (i & 0x1 == 0) ? randValuesVerifyXmulY : randValuesVerifyYmulX, hptrC,
-          matrixDim);
-    }
+    { verifyMatrixData((i & 0x1 == 0) ? randValuesVerifyXmulY : randValuesVerifyYmulX, hptrC, matrixDim); }
     sdkStopTimer(&cpuAccessTimer);
     cpuAccessTimes[i] += sdkGetAverageTimerValue(&cpuAccessTimer);
     sdkResetTimer(&cpuAccessTimer);
@@ -503,42 +460,42 @@ void runMatrixMultiplyKernel(unsigned int matrixDim, int allocType,
   }
 
   switch (allocType) {
-    case USE_HOST_PAGEABLE_AND_DEVICE_MEMORY:
-    case USE_HOST_PAGEABLE_AND_DEVICE_MEMORY_ASYNC:
-      free(hptrA);
-      free(hptrB);
-      free(hptrC);
-      checkCudaErrors(cudaFree(dptrA));
-      checkCudaErrors(cudaFree(dptrB));
-      checkCudaErrors(cudaFree(dptrC));
-      break;
+  case USE_HOST_PAGEABLE_AND_DEVICE_MEMORY:
+  case USE_HOST_PAGEABLE_AND_DEVICE_MEMORY_ASYNC:
+    free(hptrA);
+    free(hptrB);
+    free(hptrC);
+    checkCudaErrors(cudaFree(dptrA));
+    checkCudaErrors(cudaFree(dptrB));
+    checkCudaErrors(cudaFree(dptrC));
+    break;
 
-    case USE_HOST_PAGELOCKED_AND_DEVICE_MEMORY:
-    case USE_HOST_PAGELOCKED_AND_DEVICE_MEMORY_ASYNC:
-      checkCudaErrors(cudaFreeHost(hptrA));
-      checkCudaErrors(cudaFreeHost(hptrB));
-      checkCudaErrors(cudaFreeHost(hptrC));
-      checkCudaErrors(cudaFree(dptrA));
-      checkCudaErrors(cudaFree(dptrB));
-      checkCudaErrors(cudaFree(dptrC));
-      break;
+  case USE_HOST_PAGELOCKED_AND_DEVICE_MEMORY:
+  case USE_HOST_PAGELOCKED_AND_DEVICE_MEMORY_ASYNC:
+    checkCudaErrors(cudaFreeHost(hptrA));
+    checkCudaErrors(cudaFreeHost(hptrB));
+    checkCudaErrors(cudaFreeHost(hptrC));
+    checkCudaErrors(cudaFree(dptrA));
+    checkCudaErrors(cudaFree(dptrB));
+    checkCudaErrors(cudaFree(dptrC));
+    break;
 
-    case USE_ZERO_COPY:
-      checkCudaErrors(cudaFreeHost(hptrA));
-      checkCudaErrors(cudaFreeHost(hptrB));
-      checkCudaErrors(cudaFreeHost(hptrC));
-      break;
+  case USE_ZERO_COPY:
+    checkCudaErrors(cudaFreeHost(hptrA));
+    checkCudaErrors(cudaFreeHost(hptrB));
+    checkCudaErrors(cudaFreeHost(hptrC));
+    break;
 
-    case USE_MANAGED_MEMORY:
-    case USE_MANAGED_MEMORY_WITH_HINTS:
-    case USE_MANAGED_MEMORY_WITH_HINTS_ASYNC:
-      checkCudaErrors(cudaFree(dptrA));
-      checkCudaErrors(cudaFree(dptrB));
-      checkCudaErrors(cudaFree(dptrC));
-      break;
+  case USE_MANAGED_MEMORY:
+  case USE_MANAGED_MEMORY_WITH_HINTS:
+  case USE_MANAGED_MEMORY_WITH_HINTS_ASYNC:
+    checkCudaErrors(cudaFree(dptrA));
+    checkCudaErrors(cudaFree(dptrB));
+    checkCudaErrors(cudaFree(dptrC));
+    break;
 
-    default:
-      exit(EXIT_FAILURE);  // exit due to error
+  default:
+    exit(EXIT_FAILURE); // exit due to error
   }
 
   checkCudaErrors(cudaStreamDestroy(streamToRunOn));
@@ -553,17 +510,13 @@ void runMatrixMultiplyKernel(unsigned int matrixDim, int allocType,
   sdkDeleteTimer(&cpuAccessTimer);
 }
 
-void matrixMultiplyPerfRunner(bool reportAsBandwidth,
-                              bool print_launch_transfer_results,
-                              bool print_std_deviation, int device_id) {
+void matrixMultiplyPerfRunner(bool reportAsBandwidth, bool print_launch_transfer_results, bool print_std_deviation, int device_id) {
   int i;
   unsigned int minMatrixDim = 32;
   unsigned int multiplierDim = 2;
   unsigned int matrixDim;
   unsigned int minSize = minMatrixDim * minMatrixDim * sizeof(float);
-  unsigned int maxSize =
-      (maxSampleSizeInMb * ONE_MB) /
-      4;  // 3 buffers are used, but dividing by 4 (power of 2)
+  unsigned int maxSize = (maxSampleSizeInMb * ONE_MB) / 4; // 3 buffers are used, but dividing by 4 (power of 2)
   unsigned int multiplier = multiplierDim * multiplierDim;
   unsigned int numSizesToTest;
 
@@ -580,48 +533,28 @@ void matrixMultiplyPerfRunner(bool reportAsBandwidth,
 
   numSizesToTest = findNumSizesToTest(minSize, maxSize, multiplier);
 
-  createAndInitTestResults(&results, "matrixMultiplyPerf", numKernelRuns,
-                           numSizesToTest);
+  createAndInitTestResults(&results, "matrixMultiplyPerf", numKernelRuns, numSizesToTest);
 
   sizesToTest = getPtrSizesToTest(results);
 
-  createResultDataAndAddToTestResults(&gpuLaunchCallsTimes, results,
-                                      "GPU Kernel Launch Call Time", false,
-                                      reportAsBandwidth);
-  createResultDataAndAddToTestResults(&gpuTransferToCallsTimes, results,
-                                      "CPU to GPU Transfer Calls Time", false,
-                                      reportAsBandwidth);
-  createResultDataAndAddToTestResults(&gpuTransferFromCallsTimes, results,
-                                      "GPU to CPU Transfer Calls Time", false,
-                                      reportAsBandwidth);
-  createResultDataAndAddToTestResults(&gpuLaunchAndTransferCallsTimes, results,
-                                      "GPU Launch and Transfer Calls Time",
-                                      false, reportAsBandwidth);
-  createResultDataAndAddToTestResults(&gpuLaunchTransferSyncTimes, results,
-                                      "GPU Launch Transfer and Sync Time",
-                                      false, reportAsBandwidth);
-  createResultDataAndAddToTestResults(
-      &cpuAccessTimes, results, "CPU Access Time", false, reportAsBandwidth);
-  createResultDataAndAddToTestResults(&overallTimes, results, "Overall Time",
-                                      false, reportAsBandwidth);
+  createResultDataAndAddToTestResults(&gpuLaunchCallsTimes, results, "GPU Kernel Launch Call Time", false, reportAsBandwidth);
+  createResultDataAndAddToTestResults(&gpuTransferToCallsTimes, results, "CPU to GPU Transfer Calls Time", false, reportAsBandwidth);
+  createResultDataAndAddToTestResults(&gpuTransferFromCallsTimes, results, "GPU to CPU Transfer Calls Time", false, reportAsBandwidth);
+  createResultDataAndAddToTestResults(&gpuLaunchAndTransferCallsTimes, results, "GPU Launch and Transfer Calls Time", false, reportAsBandwidth);
+  createResultDataAndAddToTestResults(&gpuLaunchTransferSyncTimes, results, "GPU Launch Transfer and Sync Time", false, reportAsBandwidth);
+  createResultDataAndAddToTestResults(&cpuAccessTimes, results, "CPU Access Time", false, reportAsBandwidth);
+  createResultDataAndAddToTestResults(&overallTimes, results, "Overall Time", false, reportAsBandwidth);
 
   printf("Running ");
-  for (matrixDim = minMatrixDim, j = 0;
-       matrixDim * matrixDim <= maxSize / sizeof(float);
-       matrixDim *= multiplierDim, ++j) {
+  for (matrixDim = minMatrixDim, j = 0; matrixDim * matrixDim <= maxSize / sizeof(float); matrixDim *= multiplierDim, ++j) {
     sizesToTest[j] = matrixDim * matrixDim * sizeof(float);
     for (i = MEMALLOC_TYPE_START; i <= MEMALLOC_TYPE_END; i++) {
       printf(".");
       fflush(stdout);
-      runMatrixMultiplyKernel(
-          matrixDim, i, numKernelRuns,
-          getPtrRunTimesInMs(gpuLaunchCallsTimes, i, j),
-          getPtrRunTimesInMs(gpuTransferToCallsTimes, i, j),
-          getPtrRunTimesInMs(gpuTransferFromCallsTimes, i, j),
-          getPtrRunTimesInMs(gpuLaunchAndTransferCallsTimes, i, j),
-          getPtrRunTimesInMs(gpuLaunchTransferSyncTimes, i, j),
-          getPtrRunTimesInMs(cpuAccessTimes, i, j),
-          getPtrRunTimesInMs(overallTimes, i, j), device_id);
+      runMatrixMultiplyKernel(matrixDim, i, numKernelRuns, getPtrRunTimesInMs(gpuLaunchCallsTimes, i, j),
+                              getPtrRunTimesInMs(gpuTransferToCallsTimes, i, j), getPtrRunTimesInMs(gpuTransferFromCallsTimes, i, j),
+                              getPtrRunTimesInMs(gpuLaunchAndTransferCallsTimes, i, j), getPtrRunTimesInMs(gpuLaunchTransferSyncTimes, i, j),
+                              getPtrRunTimesInMs(cpuAccessTimes, i, j), getPtrRunTimesInMs(overallTimes, i, j), device_id);
     }
   }
   printf("\n");
@@ -630,24 +563,18 @@ void matrixMultiplyPerfRunner(bool reportAsBandwidth,
 }
 
 static void usage() {
-  printf(
-      "./cudaMemoryTypesPerf [-device=<device_id>] [-reportAsBandwidth] "
-      "[-print-launch-transfer-results] [-print-std-deviation] [-verbose]\n");
+  printf("./cudaMemoryTypesPerf [-device=<device_id>] [-reportAsBandwidth] "
+         "[-print-launch-transfer-results] [-print-std-deviation] [-verbose]\n");
   printf("Options:\n");
-  printf(
-      "-reportAsBandwidth:             By default time taken is printed, this "
-      "option allows to instead print bandwidth.\n");
-  printf(
-      "-print-launch-transfer-results: By default overall results are printed, "
-      "this option allows to print data transfers and kernel time as well.\n");
-  printf(
-      "-print-std-deviation:           Prints std deviation of the results.\n");
-  printf(
-      "-kernel-iterations=<num>:       Number of times the kernel tests should "
-      "be run[default is 100 iterations].\n");
-  printf(
-      "-device=<device_id>:            Allows to pass GPU Device ID on which "
-      "the tests will be run.\n");
+  printf("-reportAsBandwidth:             By default time taken is printed, this "
+         "option allows to instead print bandwidth.\n");
+  printf("-print-launch-transfer-results: By default overall results are printed, "
+         "this option allows to print data transfers and kernel time as well.\n");
+  printf("-print-std-deviation:           Prints std deviation of the results.\n");
+  printf("-kernel-iterations=<num>:       Number of times the kernel tests should "
+         "be run[default is 100 iterations].\n");
+  printf("-device=<device_id>:            Allows to pass GPU Device ID on which "
+         "the tests will be run.\n");
   printf("-verbose:                       Prints highly verbose output.\n");
 }
 
@@ -656,8 +583,7 @@ int main(int argc, char **argv) {
   bool print_launch_transfer_results = false;
   bool print_std_deviation = false;
 
-  if (checkCmdLineFlag(argc, (const char **)argv, "help") ||
-      checkCmdLineFlag(argc, (const char **)argv, "h")) {
+  if (checkCmdLineFlag(argc, (const char **)argv, "help") || checkCmdLineFlag(argc, (const char **)argv, "h")) {
     usage();
     printf("&&&& %s WAIVED\n", argv[0]);
     exit(EXIT_WAIVED);
@@ -667,8 +593,7 @@ int main(int argc, char **argv) {
     reportAsBandwidth = true;
   }
 
-  if (checkCmdLineFlag(argc, (const char **)argv,
-                       "print-launch-transfer-results")) {
+  if (checkCmdLineFlag(argc, (const char **)argv, "print-launch-transfer-results")) {
     print_launch_transfer_results = true;
   }
 
@@ -677,8 +602,7 @@ int main(int argc, char **argv) {
   }
 
   if (checkCmdLineFlag(argc, (const char **)argv, "kernel-iterations")) {
-    numKernelRuns =
-        getCmdLineArgumentInt(argc, (const char **)argv, "kernel-iterations");
+    numKernelRuns = getCmdLineArgumentInt(argc, (const char **)argv, "kernel-iterations");
   }
 
   if (checkCmdLineFlag(argc, (const char **)argv, "verbose")) {
@@ -687,11 +611,9 @@ int main(int argc, char **argv) {
 
   int device_id = findCudaDevice(argc, (const char **)argv);
 
-  matrixMultiplyPerfRunner(reportAsBandwidth, print_launch_transfer_results,
-                           print_std_deviation, device_id);
+  matrixMultiplyPerfRunner(reportAsBandwidth, print_launch_transfer_results, print_std_deviation, device_id);
 
-  printf(
-      "\nNOTE: The CUDA Samples are not meant for performance measurements. "
-      "Results may vary when GPU Boost is enabled.\n");
+  printf("\nNOTE: The CUDA Samples are not meant for performance measurements. "
+         "Results may vary when GPU Boost is enabled.\n");
   exit(EXIT_SUCCESS);
 }
