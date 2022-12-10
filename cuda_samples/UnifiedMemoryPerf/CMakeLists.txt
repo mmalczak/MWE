@@ -1,6 +1,6 @@
-add_library(UnifiedMemoryPerf_sample commonKernels.cu helperFunctions.cpp matrixMultiplyPerf.cu)
+add_executable(UnifiedMemoryPerf_sample commonKernels.cu helperFunctions.cpp matrixMultiplyPerf.cu)
 set_target_properties(UnifiedMemoryPerf_sample PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-set_target_properties(UnifiedMemoryPerf_sample PROPERTIES CUDA_ARCHITECTURES "80")
+set_target_properties(UnifiedMemoryPerf_sample PROPERTIES CUDA_ARCHITECTURES "86")
 target_include_directories(
     UnifiedMemoryPerf_sample
     PRIVATE
