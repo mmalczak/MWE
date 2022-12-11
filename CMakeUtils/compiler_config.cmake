@@ -1,8 +1,6 @@
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-set(CMAKE_CUDA_COMPILER "nvcc")
-
 enable_language(CUDA)
 include(CheckLanguage)
 check_language(CUDA)
