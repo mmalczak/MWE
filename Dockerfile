@@ -30,6 +30,6 @@ RUN ninja -C ./build/ all
 #################################################################
 FROM build_env as release
 WORKDIR /src/mwe/
-#RUN cmake -B ${PWD}/build/ -D CMAKE_BUILD_TYPE="Release" -G Ninja
-#RUN ninja -C ./build all
+RUN cmake -B ${PWD}/build/ -D CMAKE_BUILD_TYPE="Release" -G Ninja
+RUN ninja -C ./build all
 
