@@ -2,9 +2,9 @@
 #include <cuda_runtime_api.h>
 #include <helper_cuda.h>
 
-namespace matrix_cuda {
+namespace matrix {
 
-__global__ static void matmul_kernel(float *C, float *A, float *B, int m, int p, int n) {
+__global__ static void multiply_kernel(float *C, float *A, float *B, int m, int p, int n) {
   int i = threadIdx.y;
   int j = threadIdx.x;
   int k;
@@ -15,7 +15,7 @@ __global__ static void matmul_kernel(float *C, float *A, float *B, int m, int p,
   C[i * n + j] = s;
 }
 
-void multiply_matrix(float *C, float *A, float *B, int M, int P, int N) {
+void multiply(float *C, float *A, float *B, int M, int P, int N) {
   float *devA, *devB, *devC;
   checkCudaErrors(cudaSetDevice(0));
   checkCudaErrors(cudaMalloc(reinterpret_cast<void **>(&devA), M * P * sizeof(float)));
@@ -27,7 +27,7 @@ void multiply_matrix(float *C, float *A, float *B, int M, int P, int N) {
 
   dim3 dimBlock(N, M);
 
-  matrix_cuda::matmul_kernel<<<1, dimBlock>>>(devC, devA, devB, M, P, N);
+  matrix::multiply_kernel<<<1, dimBlock>>>(devC, devA, devB, M, P, N);
 
   checkCudaErrors(cudaGetLastError());
 
@@ -40,4 +40,4 @@ void multiply_matrix(float *C, float *A, float *B, int M, int P, int N) {
   checkCudaErrors(cudaFree(devC));
 }
 
-} // namespace matrix_cuda
+} // namespace matrix
