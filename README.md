@@ -27,7 +27,7 @@
 > docker build -t mwe --target=release .
 
 ### Run example app
-> docker run -it mwe /src/mwe/build/examples/basic_sample/basic_sample
+> docker run -it --rm --gpus all mwe /src/mwe/build/examples/basic_sample/basic_sample
 
 ### Run Unit Tests
 > docker run -it mwe sh -c 'ctest --test-dir /src/mwe/build'

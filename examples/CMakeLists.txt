@@ -1,2 +1,1 @@
 add_subdirectory(basic_sample)
-add_subdirectory(basic_cuda_sample)

@@ -1,2 +1,6 @@
 add_executable(basic_sample "basic_sample.cpp")
-target_link_libraries(basic_sample PRIVATE matrix_library utils_library)
+target_link_libraries(basic_sample PRIVATE matrix_cuda_library utils_library)
+set_target_properties(basic_sample
+                    PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+set_target_properties(basic_sample PROPERTIES CUDA_ARCHITECTURES
+                                                        "50")
