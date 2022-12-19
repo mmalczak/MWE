@@ -30,7 +30,14 @@
 > docker run -it --rm --gpus all mwe /src/mwe/build/examples/basic_sample/basic_sample
 
 ### Run Unit Tests
-> docker run -it mwe sh -c 'ctest --test-dir /src/mwe/build'
+> docker run -it --rm --gpus all mwe sh -c 'ctest --test-dir /src/mwe/build'
 
 ### Enter the container
 > docker run -it mwe bash
+
+Instruction to run on gpu:
+1. Install NVIDIA driver for the GPU
+2. Install CUDA toolkit
+3. Install CUDA docker toolkit:
+  - https://collabnix.com/introducing-new-docker-cli-api-support-for-nvidia-gpus-under-docker-engine-19-03-0-beta-release/
+  - Remember to systemctl restart docker or reboot
