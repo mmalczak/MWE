@@ -14,8 +14,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
+    - name: Get tag
+      id: date
+      run: echo "::set-output name=date::$(date +'%s')"
+
     - name: Build the Docker image
-      run: docker build -t mwe --target=release .
+      run: docker build -t mwe:${{ steps.date.outputs.date }} --target=release .
 
     - name: Run unittests
-      run: docker run mwe sh -c 'ctest --test-dir /src/mwe/build'
+      run: docker run mwe:${{ steps.date.outputs.date }} sh -c 'ctest --test-dir /src/mwe/build'
