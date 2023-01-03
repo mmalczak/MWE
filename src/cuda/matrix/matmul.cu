@@ -1,15 +1,16 @@
+#include <stdint.h>
 #include <cuda.h>
 #include <cuda_runtime_api.h>
 #include <helper_cuda.h>
 
 namespace matrix {
 
-__global__ static void multiply_kernel(float *C, float *A, float *B, int m, int p, int n) {
-  int i = blockIdx.y * blockDim.y + threadIdx.y;
+__global__ static void multiply_kernel(float *C, float *A, float *B, int32_t m, int32_t p, int32_t n) {
+  int32_t i = blockIdx.y * blockDim.y + threadIdx.y;
   if(i<m) {
-    int j = blockIdx.x * blockDim.x + threadIdx.x;
+    int32_t j = blockIdx.x * blockDim.x + threadIdx.x;
     if(j<n) {
-      int k;
+      int32_t k;
       float s = 0;
       for (k = 0; k < p; k++) {
         s += A[i * p + k] * B[k * n + j];
@@ -19,10 +20,10 @@ __global__ static void multiply_kernel(float *C, float *A, float *B, int m, int 
   }
 }
 
-void multiply(float *C, float *A, float *B, int m, int p, int n) {
+void multiply(float *C, float *A, float *B, int32_t m, int32_t p, int32_t n) {
   float *devA, *devB, *devC;
-  int N = 32;
-  int M = 32;
+  int32_t N = 32;
+  int32_t M = 32;
   checkCudaErrors(cudaSetDevice(0));
   checkCudaErrors(cudaMalloc(reinterpret_cast<void **>(&devA), m * p * sizeof(float)));
   checkCudaErrors(cudaMalloc(reinterpret_cast<void **>(&devB), p * n * sizeof(float)));

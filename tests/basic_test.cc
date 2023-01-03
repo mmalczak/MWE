@@ -70,7 +70,7 @@ TEST_F(BasicTest, basicSquare) {
 
   matrix::multiply(res, A, B, M, P, N);
 
-  for (int i = 0; i < M * N; i++) {
+  for (int32_t i = 0; i < M * N; i++) {
     ASSERT_EQ(C[i], res[i]);
   }
 }
