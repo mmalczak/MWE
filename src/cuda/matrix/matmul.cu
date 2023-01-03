@@ -7,9 +7,9 @@ namespace matrix {
 
 __global__ static void multiply_kernel(float *C, float *A, float *B, int32_t m, int32_t p, int32_t n) {
   int32_t i = blockIdx.y * blockDim.y + threadIdx.y;
-  if(i<m) {
+  if (i < m) {
     int32_t j = blockIdx.x * blockDim.x + threadIdx.x;
-    if(j<n) {
+    if (j < n) {
       int32_t k;
       float s = 0;
       for (k = 0; k < p; k++) {
@@ -33,7 +33,7 @@ void multiply(float *C, float *A, float *B, int32_t m, int32_t p, int32_t n) {
   checkCudaErrors(cudaMemcpy(devB, B, p * n * sizeof(float), cudaMemcpyHostToDevice));
 
   dim3 dimBlock(N, M);
-  dim3 dimGrid((n+N-1)/N, (m+M-1)/M);
+  dim3 dimGrid((n + N - 1) / N, (m + M - 1) / M);
   matrix::multiply_kernel<<<dimGrid, dimBlock>>>(devC, devA, devB, m, p, n);
 
   checkCudaErrors(cudaGetLastError());
