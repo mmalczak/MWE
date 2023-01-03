@@ -21,20 +21,20 @@ __global__ static void multiply_kernel(float *C, float *A, float *B, int32_t m, 
 }
 
 void multiply(float *C, float *A, float *B, int32_t m, int32_t p, int32_t n) {
-  float *devA, *devB, *devC;
+  void *devA, *devB, *devC;
   int32_t N = 32;
   int32_t M = 32;
   checkCudaErrors(cudaSetDevice(0));
-  checkCudaErrors(cudaMalloc(reinterpret_cast<void **>(&devA), m * p * sizeof(float)));
-  checkCudaErrors(cudaMalloc(reinterpret_cast<void **>(&devB), p * n * sizeof(float)));
-  checkCudaErrors(cudaMalloc(reinterpret_cast<void **>(&devC), m * n * sizeof(float)));
+  checkCudaErrors(cudaMalloc(&devA, m * p * sizeof(float)));
+  checkCudaErrors(cudaMalloc(&devB, p * n * sizeof(float)));
+  checkCudaErrors(cudaMalloc(&devC, m * n * sizeof(float)));
 
   checkCudaErrors(cudaMemcpy(devA, A, m * p * sizeof(float), cudaMemcpyHostToDevice));
   checkCudaErrors(cudaMemcpy(devB, B, p * n * sizeof(float), cudaMemcpyHostToDevice));
 
   dim3 dimBlock(N, M);
   dim3 dimGrid((n + N - 1) / N, (m + M - 1) / M);
-  matrix::multiply_kernel<<<dimGrid, dimBlock>>>(devC, devA, devB, m, p, n);
+  matrix::multiply_kernel<<<dimGrid, dimBlock>>>(static_cast<float *>(devC), static_cast<float *>(devA), static_cast<float *>(devB), m, p, n);
 
   checkCudaErrors(cudaGetLastError());
 
