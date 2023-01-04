@@ -3,7 +3,7 @@ FROM ubuntu:20.04 as build_env
 WORKDIR /src/
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get -y update && apt-get -y install --no-install-recommends build-essential clang cmake git libgtest-dev pkg-config python3-pip vim meson wget
+RUN apt-get -y update && apt-get -y install --no-install-recommends build-essential clang cmake git libgtest-dev libbenchmark-dev pkg-config python3-pip vim meson wget
 RUN apt-get -y update && apt-get -y install --no-install-recommends nvidia-cuda-toolkit
 
 COPY . /src/mwe/

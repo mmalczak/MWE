@@ -23,9 +23,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include_directories("${PROJECT_SOURCE_DIR}/src/")
 
 find_package(GTest)
+find_package(benchmark REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
 enable_testing()
 
 add_subdirectory(examples)
 add_subdirectory(src)
 add_subdirectory(tests)
+add_subdirectory(benchmarks)
