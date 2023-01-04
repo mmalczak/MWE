@@ -1,4 +1,5 @@
-#include "common/include/matrix.hpp"
+#include <stdint.h>
+#include "cuda/matrix/include/matmul.hpp"
 #include "common/include/utils.hpp"
 
 int main(int argc, char *argv[]) {
@@ -8,6 +9,7 @@ int main(int argc, char *argv[]) {
   int32_t M = 2;
   int32_t P = 2;
   int32_t N = 2;
-  matrix::multiply(M, P, N, A, B, C);
+
+  matrix::multiply(C, A, B, M, P, N);
   utils::print(M, N, C);
 }

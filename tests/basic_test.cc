@@ -1,4 +1,5 @@
-#include "common/include/matrix.hpp"
+#include "cuda/matrix/include/matrix.hpp"
+#include "cuda/matrix/include/matmul.hpp"
 #include "common/include/utils.hpp"
 
 #include <cstdlib>
@@ -67,9 +68,9 @@ TEST_F(BasicTest, basicSquare) {
   int32_t N = 2;
   float res[4] = {0, 0, 0, 0};
 
-  matrix::multiply(M, P, N, A, B, res);
+  matrix::multiply(res, A, B, M, P, N);
 
-  for (int i = 0; i < M * N; i++) {
+  for (int32_t i = 0; i < M * N; i++) {
     ASSERT_EQ(C[i], res[i]);
   }
 }
@@ -79,7 +80,7 @@ TEST_F(BasicTest, withBinaryFiles) {
   load_data(tc_name);
 
   matrix::Matrix res = construct_matrix(c.M, c.N);
-  matrix::multiply(a.M, a.N, b.N, a.data, b.data, res.data);
+  matrix::multiply(res.data, a.data, b.data, a.M, a.N, b.N);
 
   verify(c, res);
 
