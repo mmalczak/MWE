@@ -27,3 +27,9 @@ jobs:
 
     - name: Run benchmark
       run: docker run --rm --gpus all mwe:${{ steps.date.outputs.date }} sh -c '/src/mwe/build/benchmarks/matmul_benchmark --benchmark_format=json' | tee output.txt
+
+    - name: Download previous benchmark data
+      uses: actions/cache@v1
+      with:
+        path: ./cache
+        key: ${{ runner.os }}-benchmark
