@@ -26,10 +26,16 @@ jobs:
       run: docker run --rm --gpus all mwe:${{ steps.date.outputs.date }} sh -c 'cd /src/mwe/build && ctest --verbose'
 
     - name: Run benchmark
-      run: docker run --rm --gpus all mwe:${{ steps.date.outputs.date }} sh -c '/src/mwe/build/benchmarks/matmul_benchmark --benchmark_format=json' | tee output.txt
+      run: docker run --rm --gpus all mwe:${{ steps.date.outputs.date }} sh -c '/src/mwe/build/benchmarks/matmul_benchmark --benchmark_format=json' | tee benchmark_result.json
 
     - name: Download previous benchmark data
       uses: actions/cache@v1
       with:
         path: ./cache
         key: ${{ runner.os }}-benchmark
+
+    - name: Store benchmark result
+      uses: benchmark-action/github-action-benchmark@v1
+      with:
+        tool: 'googlecpp'
+        output-file-path: benchmark_result.json
