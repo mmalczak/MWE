@@ -1,24 +1,12 @@
-#include "src/common/include/utils.hpp"
+#include "tests/common/include/blob_files.hpp"
 
-#include <cstdint>
 #include <fstream>
-#include <cstdio>
 #include <string>
 #include <vector>
 
-namespace utils {
+namespace blob_files {
 
-void print(int32_t M, int32_t N, float *data) {
-  for (int32_t j = 0; j < M; j++) {
-    for (int32_t i = 0; i < N; i++) {
-      printf("%f ", *data++);
-    }
-    printf("\n");
-  }
-  printf("\n");
-}
-
-template <typename T> void read_blob_file(const std::string &filename, std::vector<T> &out) {
+template <typename T> void read(const std::string &filename, std::vector<T> &out) {
   const std::string blobs_dir = std::getenv("BLOBS_DIR");
   if (blobs_dir.empty()) {
     fprintf(stderr, "Cannot read BLOBS_DIR env variable!\n");
@@ -51,19 +39,19 @@ template <typename T> void read_blob_file(const std::string &filename, std::vect
 template <typename T> void load(std::string filename, T *dst) {
   {
     std::vector<T> d;
-    read_blob_file(filename, d);
+    read(filename, d);
     std::copy(d.begin(), d.end(), dst);
   }
 }
 
-template void read_blob_file(const std::string &path, std::vector<float> &out);
-template void read_blob_file(const std::string &path, std::vector<int8_t> &out);
-template void read_blob_file(const std::string &path, std::vector<int16_t> &out);
-template void read_blob_file(const std::string &path, std::vector<int32_t> &out);
+template void read(const std::string &path, std::vector<float> &out);
+template void read(const std::string &path, std::vector<int8_t> &out);
+template void read(const std::string &path, std::vector<int16_t> &out);
+template void read(const std::string &path, std::vector<int32_t> &out);
 
 template void load(std::string filename, float *dst);
 template void load(std::string filename, int8_t *dst);
 template void load(std::string filename, int16_t *dst);
 template void load(std::string filename, int32_t *dst);
 
-} // namespace utils
+} // namespace blob_files

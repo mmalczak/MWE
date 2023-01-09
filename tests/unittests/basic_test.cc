@@ -1,10 +1,12 @@
-#include "cuda/matrix/include/matrix.hpp"
-#include "cuda/matrix/include/matmul.hpp"
-#include "common/include/utils.hpp"
+#include "src/cuda/matrix/include/matrix.hpp"
+#include "src/cuda/matrix/include/matmul.hpp"
+#include "tests/common/include/blob_files.hpp"
 
 #include <cstdlib>
 
-#include <benchmark/benchmark.h>
+#include <gtest/gtest.h>
+
+constexpr float tolerance = 1e-4;
 
 matrix::Matrix construct_matrix(int32_t M, int32_t N) {
   float *p = static_cast<float *>(calloc(M * N, sizeof(float)));
@@ -13,11 +15,11 @@ matrix::Matrix construct_matrix(int32_t M, int32_t N) {
 
 matrix::Matrix construct_matrix(int32_t M, int32_t N, std::string path) {
   matrix::Matrix m = construct_matrix(M, N);
-  utils::load<float>(path, m.data);
+  blob_files::load<float>(path, m.data);
   return m;
 }
 
-class BasicTest {
+class BasicTest : public ::testing::Test {
 public:
   void load_data(std::string tc_name) {
     std::string a_path = tc_name + "/" + "A";
@@ -26,7 +28,7 @@ public:
     std::string dim_path = tc_name + "/" + "Dims";
 
     int32_t dims[3];
-    utils::load(dim_path, dims);
+    blob_files::load(dim_path, dims);
 
     int32_t M = dims[0];
     int32_t P = dims[1];
@@ -43,37 +45,45 @@ public:
     free(c.data);
   }
 
+  void verify(const matrix::Matrix &m1, const matrix::Matrix &m2) {
+    ASSERT_EQ(m1.M, m2.M);
+    ASSERT_EQ(m1.N, m2.N);
+
+    for (int32_t i = 0; i < m1.M * m1.N; i++) {
+      EXPECT_NEAR(m1.data[i], m2.data[i], tolerance);
+    }
+  }
+
   matrix::Matrix a;
   matrix::Matrix b;
   matrix::Matrix c;
 };
 
-static void BM_BasicSquare(benchmark::State &state) {
+TEST_F(BasicTest, basicSquare) {
   float A[4] = {1, 2, 3, 4};
   float B[4] = {1, 2, 3, 4};
+  float C[4] = {7, 10, 15, 22};
   int32_t M = 2;
   int32_t P = 2;
   int32_t N = 2;
   float res[4] = {0, 0, 0, 0};
-  for (auto _ : state)
-    matrix::multiply(res, A, B, M, P, N);
+
+  matrix::multiply(res, A, B, M, P, N);
+
+  for (int32_t i = 0; i < M * N; i++) {
+    ASSERT_EQ(C[i], res[i]);
+  }
 }
 
-BENCHMARK(BM_BasicSquare);
-
-static void BM_WithBinaryFiles(benchmark::State &state) {
-  BasicTest basicTest;
+TEST_F(BasicTest, withBinaryFiles) {
   std::string tc_name = "tc1";
-  basicTest.load_data(tc_name);
+  load_data(tc_name);
 
-  matrix::Matrix res = construct_matrix(basicTest.c.M, basicTest.c.N);
-  for (auto _ : state)
-    matrix::multiply(res.data, basicTest.a.data, basicTest.b.data, basicTest.a.M, basicTest.a.N, basicTest.b.N);
+  matrix::Matrix res = construct_matrix(c.M, c.N);
+  matrix::multiply(res.data, a.data, b.data, a.M, a.N, b.N);
 
-  basicTest.free_data();
+  verify(c, res);
+
+  free_data();
   free(res.data);
 }
-
-BENCHMARK(BM_WithBinaryFiles);
-
-BENCHMARK_MAIN();
