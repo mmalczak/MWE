@@ -33,7 +33,7 @@
 > docker run -it --rm --gpus all mwe sh -c 'cd /src/mwe/build && ctest --verbose'
 
 ### Run Benchmarks
-> docker run -it --rm --gpus all mwe /src/mwe/build/benchmarks/matmul_benchmark
+> docker run -it --rm --gpus all mwe /src/mwe/build/tests/benchmarks/matmul_benchmark
 
 ### Enter the container
 > docker run -it mwe bash
