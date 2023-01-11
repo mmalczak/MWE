@@ -1,7 +1,7 @@
-#include <stdint.h>
 #include <cuda.h>
 #include <cuda_runtime_api.h>
 #include <helper_cuda.h>
+#include <cstdint>
 
 namespace matrix {
 
@@ -20,10 +20,16 @@ __global__ static void multiply_kernel(float *C, float *A, float *B, int32_t m, 
   }
 }
 
-void multiply(float *C, float *A, float *B, int32_t m, int32_t p, int32_t n) {
-  void *devA, *devB, *devC;
+void run_multiply_kernel(float *devC, float *devA, float *devB, int32_t m, int32_t p, int32_t n) {
   int32_t N = 32;
   int32_t M = 32;
+  dim3 dimBlock(N, M);
+  dim3 dimGrid((n + N - 1) / N, (m + M - 1) / M);
+  matrix::multiply_kernel<<<dimGrid, dimBlock>>>(devC, devA, devB, m, p, n);
+}
+
+void multiply(float *C, float *A, float *B, int32_t m, int32_t p, int32_t n) {
+  void *devA, *devB, *devC;
   checkCudaErrors(cudaSetDevice(0));
   checkCudaErrors(cudaMalloc(&devA, m * p * sizeof(float)));
   checkCudaErrors(cudaMalloc(&devB, p * n * sizeof(float)));
@@ -32,9 +38,7 @@ void multiply(float *C, float *A, float *B, int32_t m, int32_t p, int32_t n) {
   checkCudaErrors(cudaMemcpy(devA, A, m * p * sizeof(float), cudaMemcpyHostToDevice));
   checkCudaErrors(cudaMemcpy(devB, B, p * n * sizeof(float), cudaMemcpyHostToDevice));
 
-  dim3 dimBlock(N, M);
-  dim3 dimGrid((n + N - 1) / N, (m + M - 1) / M);
-  matrix::multiply_kernel<<<dimGrid, dimBlock>>>(static_cast<float *>(devC), static_cast<float *>(devA), static_cast<float *>(devB), m, p, n);
+  run_multiply_kernel(static_cast<float *>(devC), static_cast<float *>(devA), static_cast<float *>(devB), m, p, n);
 
   checkCudaErrors(cudaGetLastError());
 

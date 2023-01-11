@@ -1,4 +1,4 @@
-#include <stdint.h>
+#include <cstdint>
 #include "src/cuda/matrix/include/matmul.hpp"
 #include "src/common/include/utils.hpp"
 
