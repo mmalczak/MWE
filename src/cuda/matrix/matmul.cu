@@ -1,6 +1,6 @@
 #include <cuda.h>
 #include <cuda_runtime_api.h>
-#include <helper_cuda.h>
+#include "src/cuda/Common/helper_cuda.h"
 #include <cstdint>
 
 namespace matrix {
