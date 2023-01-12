@@ -1,11 +1,10 @@
-#include "src/cuda/matrix/include/matrix.hpp"
-#include "src/cuda/matrix/include/matmul.hpp"
-#include "tests/common/include/matrix_test.hpp"
 #include <cstdlib>
 #include <chrono>
 #include <benchmark/benchmark.h>
-#include <cuda.h>
 #include <cuda_runtime_api.h>
+
+#include "src/cuda/matrix/include/matrix.hpp"
+#include "src/cuda/matrix/include/matmul.hpp"
 
 static void BM_BasicSquare(benchmark::State &state) {
   void *A, *B, *C;
