@@ -6,10 +6,8 @@
 namespace matrix {
 
 __global__ static void multiply_kernel(float *C, float *A, float *B, int32_t m, int32_t p, int32_t n) {
-  int32_t i = blockIdx.y * blockDim.y + threadIdx.y;
-  if (i < m) {
-    int32_t j = blockIdx.x * blockDim.x + threadIdx.x;
-    if (j < n) {
+  for (int32_t i = blockIdx.y * blockDim.y + threadIdx.y; i < m; i += gridDim.y * blockDim.y) {
+    for (int32_t j = blockIdx.x * blockDim.x + threadIdx.x; j < n; j += gridDim.x * blockDim.x) {
       int32_t k;
       float s = 0;
       for (k = 0; k < p; k++) {
@@ -22,8 +20,10 @@ __global__ static void multiply_kernel(float *C, float *A, float *B, int32_t m, 
 
 void run_multiply_kernel(float *devC, float *devA, float *devB, int32_t m, int32_t p, int32_t n) {
   int32_t K = 32;
+  int32_t gridSizeX = 32;
+  int32_t gridSizeY = 32;
   dim3 dimBlock(K, K);
-  dim3 dimGrid((n + K - 1) / K, (m + K - 1) / K);
+  dim3 dimGrid(gridSizeX, gridSizeY);
   matrix::multiply_kernel<<<dimGrid, dimBlock>>>(devC, devA, devB, m, p, n);
 }
 
