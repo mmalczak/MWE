@@ -17,7 +17,7 @@
 
 ### Run Unit Tests
 > export BLOBS_DIR="${PWD}/tests/blobs/"
-> ctest --test-dir ${PWD}/build/ --verbose
+> cd build && ctest ${PWD}/build/ --verbose
 
 ## Docker container build
 ### Debug build
@@ -30,7 +30,7 @@
 > docker run -it --rm --gpus all mwe /src/mwe/build/examples/basic_sample/basic_sample
 
 ### Run Unit Tests
-> docker run -it --rm --gpus all mwe sh -c 'ctest --test-dir /src/mwe/build'
+> docker run -it --rm --gpus all mwe sh -c 'cd /src/mwe/build && ctest --verbose'
 
 ### Enter the container
 > docker run -it mwe bash
