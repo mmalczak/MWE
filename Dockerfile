@@ -1,5 +1,5 @@
 #################################################################
-FROM ubuntu:22.04 as build_env
+FROM ubuntu:20.04 as build_env
 WORKDIR /src/
 ENV DEBIAN_FRONTEND=noninteractive
 
