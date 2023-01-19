@@ -13,12 +13,24 @@ static void BM_BasicSquare(benchmark::State &state) {
   A = malloc(m * p * sizeof(float));
   B = malloc(p * n * sizeof(float));
   C = malloc(m * n * sizeof(float));
+  cudaEvent_t start, stop;
+  cudaEventCreate(&start);
+  cudaEventCreate(&stop);
+  float milliseconds = 0;
+  double seconds = 0;
+
   for (auto _ : state) {
+    cudaEventRecord(start);
     matrix::multiply(static_cast<float *>(C), static_cast<float *>(A), static_cast<float *>(B), m, p, n);
+    cudaEventRecord(stop);
+    cudaEventSynchronize(stop);
+    cudaEventElapsedTime(&milliseconds, start, stop);
+    seconds = milliseconds / 1000;
+    state.SetIterationTime(seconds);
   }
 }
 
-BENCHMARK(BM_BasicSquare)->RangeMultiplier(2)->Range(1 << 8, 1 << 13);
+BENCHMARK(BM_BasicSquare)->RangeMultiplier(2)->Range(1 << 8, 1 << 13)->UseManualTime();
 
 static void BM_BasicSquareKernel(benchmark::State &state) {
   void *devA, *devB, *devC;
@@ -38,7 +50,6 @@ static void BM_BasicSquareKernel(benchmark::State &state) {
     matrix::run_multiply_kernel(static_cast<float *>(devC), static_cast<float *>(devA), static_cast<float *>(devB), m, p, n);
     cudaEventRecord(stop);
     cudaEventSynchronize(stop);
-
     cudaEventElapsedTime(&milliseconds, start, stop);
     seconds = milliseconds / 1000;
     state.SetIterationTime(seconds);
