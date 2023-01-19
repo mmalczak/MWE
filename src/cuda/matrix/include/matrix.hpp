@@ -1,3 +1,6 @@
+#ifndef __MATRIX_HPP__
+#define __MATRIX_HPP__
+
 #include <cstdint>
 
 namespace matrix {
@@ -8,3 +11,5 @@ struct Matrix {
 };
 
 } // namespace matrix
+
+#endif

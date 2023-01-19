@@ -1,6 +1,6 @@
-#include <stdint.h>
-#include "cuda/matrix/include/matmul.hpp"
-#include "common/include/utils.hpp"
+#include <cstdint>
+#include "src/cuda/matrix/include/matmul.hpp"
+#include "src/common/include/utils.hpp"
 
 int main(int argc, char *argv[]) {
   float A[] = {1, 2, 3, 4};
