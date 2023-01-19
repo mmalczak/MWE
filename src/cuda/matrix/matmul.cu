@@ -21,10 +21,9 @@ __global__ static void multiply_kernel(float *C, float *A, float *B, int32_t m, 
 }
 
 void run_multiply_kernel(float *devC, float *devA, float *devB, int32_t m, int32_t p, int32_t n) {
-  int32_t N = 32;
-  int32_t M = 32;
-  dim3 dimBlock(N, M);
-  dim3 dimGrid((n + N - 1) / N, (m + M - 1) / M);
+  int32_t K = 32;
+  dim3 dimBlock(K, K);
+  dim3 dimGrid((n + K - 1) / K, (m + K - 1) / K);
   matrix::multiply_kernel<<<dimGrid, dimBlock>>>(devC, devA, devB, m, p, n);
 }
 
