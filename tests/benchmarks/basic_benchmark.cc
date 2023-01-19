@@ -19,7 +19,7 @@ static void BM_BasicSquare(benchmark::State &state) {
   }
 }
 
-BENCHMARK(BM_BasicSquare)->RangeMultiplier(2)->Range(2, 1 << 10);
+BENCHMARK(BM_BasicSquare)->RangeMultiplier(2)->Range(1 << 8, 1 << 11);
 
 static void BM_BasicSquareKernel(benchmark::State &state) {
   void *devA, *devB, *devC;
@@ -41,6 +41,6 @@ static void BM_BasicSquareKernel(benchmark::State &state) {
   cudaFree(devC);
 }
 
-BENCHMARK(BM_BasicSquareKernel)->RangeMultiplier(2)->Range(2, 1 << 10)->UseManualTime();
+BENCHMARK(BM_BasicSquareKernel)->RangeMultiplier(2)->Range(1 << 8, 1 << 11)->UseManualTime();
 
 BENCHMARK_MAIN();
