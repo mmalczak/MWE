@@ -1,5 +1,4 @@
 #include <cstdlib>
-#include <chrono>
 #include <benchmark/benchmark.h>
 #include <cuda_runtime_api.h>
 
@@ -19,7 +18,7 @@ static void BM_BasicSquare(benchmark::State &state) {
   }
 }
 
-BENCHMARK(BM_BasicSquare)->RangeMultiplier(2)->Range(1 << 8, 1 << 11);
+BENCHMARK(BM_BasicSquare)->RangeMultiplier(2)->Range(1 << 8, 1 << 13);
 
 static void BM_BasicSquareKernel(benchmark::State &state) {
   void *devA, *devB, *devC;
@@ -29,18 +28,26 @@ static void BM_BasicSquareKernel(benchmark::State &state) {
   cudaMalloc(&devA, m * p * sizeof(float));
   cudaMalloc(&devB, p * n * sizeof(float));
   cudaMalloc(&devC, m * n * sizeof(float));
+  cudaEvent_t start, stop;
+  cudaEventCreate(&start);
+  cudaEventCreate(&stop);
+  float milliseconds = 0;
+  double seconds = 0;
   for (auto _ : state) {
-    auto start = std::chrono::high_resolution_clock::now();
+    cudaEventRecord(start);
     matrix::run_multiply_kernel(static_cast<float *>(devC), static_cast<float *>(devA), static_cast<float *>(devB), m, p, n);
-    auto end = std::chrono::high_resolution_clock::now();
-    auto elapsed_seconds = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
-    state.SetIterationTime(elapsed_seconds.count());
+    cudaEventRecord(stop);
+    cudaEventSynchronize(stop);
+
+    cudaEventElapsedTime(&milliseconds, start, stop);
+    seconds = milliseconds / 1000;
+    state.SetIterationTime(seconds);
   }
   cudaFree(devA);
   cudaFree(devB);
   cudaFree(devC);
 }
 
-BENCHMARK(BM_BasicSquareKernel)->RangeMultiplier(2)->Range(1 << 8, 1 << 11)->UseManualTime();
+BENCHMARK(BM_BasicSquareKernel)->RangeMultiplier(2)->Range(1 << 8, 1 << 13)->UseManualTime();
 
 BENCHMARK_MAIN();
